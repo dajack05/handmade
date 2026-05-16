@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
     }
 
     BeginDrawing();
-
     ClearBackground(BLACK);
 
     Layout::BeginFrame();
@@ -32,47 +31,56 @@ int main(int argc, char **argv) {
       Layout::BeginView({
           .x = 0,
           .y = 0,
-          // .w = GetScreenWidth(),
+          .w = GetScreenWidth(),
           .h = GetScreenHeight(),
-          .roundness = 0.3f,
           .padding = 10,
           .gap = 10,
-          .bgColor = ORANGE,
+          .bgColor = NONE,
           .layoutDirection =
               vert ? LayoutDirection::Vertical : LayoutDirection::Horizontal,
       });
       {
         Layout::BeginView({
-            .type = ViewType::Button,
-            .x = 0,
-            .y = 0,
-            .w = 100,
-            .h = 100,
-            .roundness = 0.1f,
-            .bgColor = RED,
-            .onClickFunc = OnBtnClick,
+            .w = SizeGrow,
+            .h = SizeGrow,
+            .padding = 10,
+            .gap = 10,
+            .bgColor = WHITE,
+            .layoutDirection = LayoutDirection::Vertical,
         });
-        Layout::EndView();
-        if (show_red) {
+        {
           Layout::BeginView({
-              .x = 0,
-              .y = 0,
               .w = 100,
-              .h = SizeGrow,
-              .roundness = 0.1f,
-              .bgColor = GREEN,
+              .h = 100,
+              .bgColor = RED,
           });
           Layout::EndView();
+          Layout::BeginView({
+              .w = 100,
+              .h = 100,
+              .bgColor = BLUE,
+              .layoutDirection = LayoutDirection::Horizontal,
+          });
+          {
+            Layout::BeginView({
+                .w = 20,
+                .h = 20,
+                .bgColor = GREEN,
+                .borderColor = RED,
+                .borderThickness = 2,
+            });
+            Layout::EndView();
+            Layout::BeginView({
+                .w = 20,
+                .h = 20,
+                .bgColor = GREEN,
+                .borderColor = RED,
+                .borderThickness = 2,
+            });
+            Layout::EndView();
+          }
+          Layout::EndView();
         }
-        Layout::BeginView({
-            .x = 0,
-            .y = 0,
-            .w = 100,
-            .h = 100,
-            // .h = 100,
-            .roundness = 0.1f,
-            .bgColor = BLUE,
-        });
         Layout::EndView();
       }
       Layout::EndView();

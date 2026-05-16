@@ -1,7 +1,6 @@
 #include "src/ViewFuncs.hpp"
 
 #include "src/View.hpp"
-#include <cstdio>
 #include <raylib.h>
 
 namespace ViewFuncs {
@@ -12,7 +11,9 @@ void RenderView(const View &view) {
       (float)view.w,
       (float)view.h,
   };
-  DrawRectangleRounded(rect, view.roundness, 4, view.bgColor);
+  if (view.bgColor.a != 0) {
+    DrawRectangleRounded(rect, view.roundness, 4, view.bgColor);
+  }
   if (view.borderThickness > 0) {
     DrawRectangleRoundedLinesEx(rect, view.roundness, 4, view.borderThickness,
                                 view.borderColor);

@@ -4,6 +4,7 @@
 #include "src/ViewFuncs.hpp"
 #include "src/util/List.hpp"
 #include "src/util/Math.hpp"
+#include "src/util/String.hpp"
 #include <cstdio>
 #include <raylib.h>
 
@@ -191,32 +192,45 @@ void calcSize(CachedView &view) {
 
 bool calcGrow(CachedView &view) {
   CachedView *parent = getParent(view);
+  bool didChange = false;
   if (parent) {
     AxisPackedDims axis = getAxisDims(view);
     AxisPackedDims parentAxis = getAxisDims(*parent);
-    if (axis.on_axis_size != SizeGrow) {
-      return false;
+    if (axis.on_axis_size == SizeGrow) {
+      const int total_size = parentAxis.on_axis_size;
+      const int padded_size = total_size - parent->view.padding * 2;
+      const int gapped_size =
+          padded_size - (parent->children.count() - 1) * parent->view.gap;
+      int sibling_size = 0;
+      int siblings_grow = 0;
+      for (auto sibi = 0; sibi < parent->children.count(); sibi++) {
+        if (sibi == view.child_idx)
+          continue;
+        AxisPackedDims sibAxis =
+            getAxisDims(viewCache.get(parent->children.get(sibi)));
+        sibling_size += sibAxis.on_axis_size;
+        if (sibAxis.on_axis_size == SizeGrow) {
+          siblings_grow++;
+        }
+      }
+      const int after_sibling_size = gapped_size - sibling_size;
+      const int final_size = after_sibling_size / (siblings_grow + 1);
+      if (axis.on_axis_size != final_size) {
+        axis.on_axis_size = final_size;
+        parent->child_offset = 0;
+        didChange = true;
+      }
     }
-    const int total_size = parentAxis.on_axis_size;
-    const int padded_size = total_size - parent->view.padding * 2;
-    const int gapped_size =
-        padded_size - (parent->children.count() - 1) * parent->view.gap;
-    int sibling_size = 0;
-    for (auto sibi = 0; sibi < parent->children.count(); sibi++) {
-      if (sibi == view.child_idx)
-        continue;
-      AxisPackedDims sibAxis =
-          getAxisDims(viewCache.get(parent->children.get(sibi)));
-      sibling_size += sibAxis.on_axis_size;
-    }
-    const int final_size = gapped_size - sibling_size;
-    if (axis.on_axis_size != final_size) {
-      axis.on_axis_size = final_size;
-      parent->child_offset = 0;
-      return true;
+    if (axis.off_axis_size == SizeGrow) {
+      const int total_size = parentAxis.off_axis_size;
+      const int final_size = total_size - parent->view.padding * 2;
+      if (axis.off_axis_size != final_size) {
+        axis.off_axis_size = final_size;
+        // didChange = true;
+      }
     }
   }
-  return false;
+  return didChange;
 }
 
 void calcPosition(CachedView &view) {
@@ -226,9 +240,10 @@ void calcPosition(CachedView &view) {
     const int gap = parent->view.gap * view.child_idx;
     AxisPackedDims axis = getAxisDims(view);
     AxisPackedDims parentAxis = getAxisDims(*parent);
-    axis.on_axis_pos = parentAxis.on_axis_pos + parent->child_offset +
-                       parent->view.padding + gap;
-    axis.off_axis_pos = parentAxis.off_axis_pos + parent->view.padding;
+    view.view.x = parent->view.x;
+    view.view.y = parent->view.y;
+    axis.on_axis_pos += parent->child_offset + parent->view.padding + gap;
+    axis.off_axis_pos += parent->view.padding;
     parent->child_offset += axis.on_axis_size;
   }
 }

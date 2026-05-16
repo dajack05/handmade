@@ -19,6 +19,8 @@ enum class ViewState {
   Focus,
 };
 
+const Color NONE{0, 0, 0, 0};
+
 const int SizeFit = 0;
 const int SizeGrow = -1;
 
@@ -40,6 +42,8 @@ struct View {
 
   ViewState state = ViewState::None;
   LayoutDirection layoutDirection = LayoutDirection::Horizontal;
+
+  char tag[16] = {0};
 
   void (*renderFunc)(const View &) = nullptr;
   void (*onClickFunc)(void) = nullptr;
