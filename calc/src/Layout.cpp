@@ -1,4 +1,5 @@
 #include "Layout.hpp"
+#include "src/Colors.hpp"
 #include "src/Stats.hpp"
 #include "src/View.hpp"
 #include "src/ViewFuncs.hpp"
@@ -53,17 +54,22 @@ CachedView *getParent(CachedView &view) {
   return &viewCache.get(view.parent);
 }
 
-AxisPackedDims getAxisDims(CachedView &view) {
-  CachedView *parent = getParent(view);
+AxisPackedDims getAxisDims(CachedView &view, bool forceSelf = false) {
+  CachedView *parent = nullptr;
+  if (!forceSelf) {
+    parent = getParent(view);
+  }
   bool x = parent
                ? (parent->view.layoutDirection == LayoutDirection::Horizontal)
-               : view.view.layoutDirection == LayoutDirection::Horizontal;
-  return {
+               : (view.view.layoutDirection == LayoutDirection::Horizontal);
+  AxisPackedDims dims{
       x ? view.view.x : view.view.y,
       x ? view.view.y : view.view.x,
       x ? view.view.w : view.view.h,
       x ? view.view.h : view.view.w,
   };
+
+  return dims;
 }
 
 void BeginView(View view) {
@@ -74,6 +80,9 @@ void BeginView(View view) {
       break;
     case ViewType::Button:
       view.renderFunc = ViewFuncs::RenderButton;
+      break;
+    case ViewType::Text:
+      view.renderFunc = ViewFuncs::RenderText;
       break;
     }
   }
@@ -118,6 +127,7 @@ void BeginFrame() {
   viewCache.clear();
   viewStack.clear();
   layout_start = GetTime();
+  SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 }
 
 void EndFrame() {
@@ -195,7 +205,7 @@ bool calcGrow(CachedView &view) {
   bool didChange = false;
   if (parent) {
     AxisPackedDims axis = getAxisDims(view);
-    AxisPackedDims parentAxis = getAxisDims(*parent);
+    AxisPackedDims parentAxis = getAxisDims(*parent, true);
     if (axis.on_axis_size == SizeGrow) {
       const int total_size = parentAxis.on_axis_size;
       const int padded_size = total_size - parent->view.padding * 2;
@@ -237,6 +247,9 @@ void calcPosition(CachedView &view) {
 
   CachedView *parent = getParent(view);
   if (parent) {
+    if (view.child_idx == 0) {
+      parent->child_offset = 0;
+    }
     const int gap = parent->view.gap * view.child_idx;
     AxisPackedDims axis = getAxisDims(view);
     AxisPackedDims parentAxis = getAxisDims(*parent);
@@ -249,6 +262,9 @@ void calcPosition(CachedView &view) {
 }
 
 void checkInput(CachedView &view) {
+  if (view.view.type != ViewType::Button) {
+    return;
+  }
   const Rectangle rect{
       (float)view.view.x,
       (float)view.view.y,
@@ -258,9 +274,53 @@ void checkInput(CachedView &view) {
 
   if (CheckCollisionPointRec(GetMousePosition(), rect)) {
     view.view.state = ViewState::Hover;
+    SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
       view.view.state = ViewState::Active;
     }
   }
 }
+
+void BeginPane(View view, int width, int height, const char *tag) {
+  view.w = width;
+  view.h = height;
+  StrCopy(tag, view.tag, VIEW_MAX_TAG_LEN);
+  Layout::BeginView(view);
+}
+
+void Button(View view, int width, int height, const char *label,
+            void (*onClickFunc)(const View &), bool accent, const char *tag) {
+  view.type = ViewType::Button;
+  view.onClickFunc = onClickFunc;
+  view.bgColor = accent ? Colors.accent : Colors.primary;
+  view.borderColor = accent ? Colors.accent_lt : Colors.primary_lt;
+  StrCopy(label, view.label, VIEW_MAX_LABEL_LEN);
+
+  BeginPane(view, width, height, tag);
+  EndView();
+}
+
+void Text(View view, int width, int height, const char *text, const char *tag) {
+  view.type = ViewType::Text;
+  StrCopy(text, view.label, VIEW_MAX_LABEL_LEN);
+  BeginPane(view, width, height, tag);
+  EndView();
+}
+
+void BeginHBox(View view, int width, int height, int padding, int gap,
+               const char *tag) {
+  view.layoutDirection = LayoutDirection::Horizontal;
+  view.padding = padding;
+  view.gap = gap;
+  BeginPane(view, width, height, tag);
+}
+
+void BeginVBox(View view, int width, int height, int padding, int gap,
+               const char *tag) {
+  view.layoutDirection = LayoutDirection::Vertical;
+  view.padding = padding;
+  view.gap = gap;
+  BeginPane(view, width, height, tag);
+}
+
 }; // namespace Layout

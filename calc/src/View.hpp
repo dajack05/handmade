@@ -1,10 +1,15 @@
 #pragma once
 
+#include "src/Colors.hpp"
 #include <raylib.h>
+
+#define VIEW_MAX_LABEL_LEN 64
+#define VIEW_MAX_TAG_LEN 32
 
 enum class ViewType {
   View,
   Button,
+  Text,
 };
 
 enum class LayoutDirection {
@@ -36,15 +41,17 @@ struct View {
   int padding = 0;
   int gap = 0;
 
-  Color bgColor = BLACK;
-  Color borderColor = BLACK;
+  Color bgColor = Colors.dark;
+  Color borderColor = Colors.light;
+  Color textColor = Colors.light;
   int borderThickness = 0;
 
   ViewState state = ViewState::None;
   LayoutDirection layoutDirection = LayoutDirection::Horizontal;
 
-  char tag[16] = {0};
+  char tag[VIEW_MAX_TAG_LEN] = {0};
+  char label[VIEW_MAX_LABEL_LEN] = {0};
 
   void (*renderFunc)(const View &) = nullptr;
-  void (*onClickFunc)(void) = nullptr;
+  void (*onClickFunc)(const View &) = nullptr;
 };

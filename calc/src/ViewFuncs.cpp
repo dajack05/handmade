@@ -1,6 +1,7 @@
 #include "src/ViewFuncs.hpp"
 
 #include "src/View.hpp"
+#include "src/util/String.hpp"
 #include <raylib.h>
 
 namespace ViewFuncs {
@@ -23,11 +24,33 @@ void RenderView(const View &view) {
 void RenderButton(const View &view) {
   View nView = view;
   if (view.state == ViewState::Hover || view.state == ViewState::Active) {
-    nView.borderThickness = 2;
+    nView.borderThickness = 4;
   }
   if (view.state == ViewState::Active && view.onClickFunc) {
-    view.onClickFunc();
+    view.onClickFunc(view);
   }
   RenderView(nView);
+  if (StrLen(view.label) > 0) {
+    const int fontSize = view.h / 2;
+    const int textWidth = MeasureText(view.label, fontSize);
+    const int center_x = view.x + view.w / 2;
+    const int center_y = view.y + view.h / 2;
+    DrawText(view.label, center_x - textWidth / 2, center_y - fontSize / 2,
+             view.h / 2, view.textColor);
+  }
 }
+
+void RenderText(const View &view) {
+  View nView = view;
+  RenderView(view);
+  if (StrLen(view.label) > 0) {
+    const int fontSize = view.h / 2;
+    const int textWidth = MeasureText(view.label, fontSize);
+    const int center_x = view.x + view.padding;
+    const int center_y = view.y + view.h / 2;
+    DrawText(view.label, center_x - textWidth / 2, center_y - fontSize / 2,
+             view.h / 2, view.textColor);
+  }
+}
+
 } // namespace ViewFuncs

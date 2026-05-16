@@ -1,90 +1,91 @@
 #include "src/Layout.hpp"
 #include "src/Stats.hpp"
 #include "src/View.hpp"
+#include "src/tests/Tests.hpp"
+#include "src/util/String.hpp"
+#include <cstdio>
 #include <cstring>
 #include <raylib.h>
 
-bool show_red = true;
+const char *KEYS[12] = {
+    "7", "8", "9", //
+    "4", "5", "6", //
+    "1", "2", "3", //
+    " ", "0", " ", //
+};
 
-void OnBtnClick() { show_red = !show_red; }
+double result = 0.0;
+char resultStr[VIEW_MAX_LABEL_LEN] = {0};
+
+void OnKeypadClicked(const View &view) {
+  int key = StrToInt(view.tag);
+  printf("Key: %i\n", key);
+}
 
 int main(int argc, char **argv) {
+
+  if (!RunTests()) {
+    return 1;
+  }
+
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(400, 600, "Calc");
   SetTargetFPS(60);
 
   unsigned long frameCount = 0;
 
-  bool vert = true;
-
   while (!WindowShouldClose()) {
     frameCount++;
-
-    if (IsKeyPressed(KEY_SPACE)) {
-      vert = !vert;
-    }
 
     BeginDrawing();
     ClearBackground(BLACK);
 
     Layout::BeginFrame();
+    Layout::BeginVBox({.layoutDirection = LayoutDirection::Vertical},
+                      GetScreenWidth(), GetScreenHeight());
     {
-      Layout::BeginView({
-          .x = 0,
-          .y = 0,
-          .w = GetScreenWidth(),
-          .h = GetScreenHeight(),
-          .padding = 10,
-          .gap = 10,
-          .bgColor = NONE,
-          .layoutDirection =
-              vert ? LayoutDirection::Vertical : LayoutDirection::Horizontal,
-      });
-      {
-        Layout::BeginView({
-            .w = SizeGrow,
-            .h = SizeGrow,
-            .padding = 10,
-            .gap = 10,
-            .bgColor = WHITE,
-            .layoutDirection = LayoutDirection::Vertical,
-        });
-        {
-          Layout::BeginView({
-              .w = 100,
-              .h = 100,
-              .bgColor = RED,
-          });
-          Layout::EndView();
-          Layout::BeginView({
-              .w = 100,
-              .h = 100,
-              .bgColor = BLUE,
-              .layoutDirection = LayoutDirection::Horizontal,
-          });
+      // Result bar
+      Layout::Text(
           {
-            Layout::BeginView({
-                .w = 20,
-                .h = 20,
-                .bgColor = GREEN,
-                .borderColor = RED,
-                .borderThickness = 2,
-            });
-            Layout::EndView();
-            Layout::BeginView({
-                .w = 20,
-                .h = 20,
-                .bgColor = GREEN,
-                .borderColor = RED,
-                .borderThickness = 2,
-            });
+              .padding = 5,
+              .bgColor = Colors.light,
+              .textColor = Colors.dark,
+          },
+          SizeGrow, 50, TextFormat("%f", result));
+
+      Layout::BeginHBox({}, SizeGrow, SizeGrow, 0);
+      {
+        // Main container
+        Layout::BeginVBox({}, SizeGrow, SizeGrow, 0, 0);
+        {
+          // Numbers
+          for (auto y = 0; y < 4; y++) {
+            Layout::BeginHBox({}, SizeGrow, SizeGrow, 5);
+            for (auto x = 0; x < 3; x++) {
+              const unsigned int idx = x + y * 3;
+              if (idx == 9 || idx == 11) {
+                Layout::BeginView({.w = SizeGrow, .h = SizeGrow});
+                Layout::EndView();
+              } else {
+                const char *lbl = KEYS[idx];
+                Layout::Button({}, SizeGrow, SizeGrow, lbl, OnKeypadClicked,
+                               false, lbl);
+              }
+            }
             Layout::EndView();
           }
-          Layout::EndView();
+        }
+        Layout::EndView();
+        Layout::BeginVBox({.bgColor = RED}, 80, SizeGrow);
+        {
+          // functions
         }
         Layout::EndView();
       }
       Layout::EndView();
     }
+    Layout::EndView();
+
     Layout::EndFrame();
 
     EndDrawing();
