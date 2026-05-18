@@ -19,7 +19,7 @@ char resultStr[VIEW_MAX_LABEL_LEN] = {0};
 
 void OnKeypadClicked(const View &view) {
   int key = StrToInt(view.tag);
-  printf("Key: %i\n", key);
+  result = result * 10 + key;
 }
 
 int main(int argc, char **argv) {
@@ -29,7 +29,8 @@ int main(int argc, char **argv) {
   }
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(400, 600, "Calc");
+  InitWindow(400, 500, "Calc");
+  SetWindowMinSize(300, 300);
   SetTargetFPS(60);
 
   unsigned long frameCount = 0;
@@ -47,6 +48,7 @@ int main(int argc, char **argv) {
       // Result bar
       Layout::Text(
           {
+              .roundness = 0.25f,
               .padding = 5,
               .bgColor = Colors.light,
               .textColor = Colors.dark,
@@ -68,8 +70,8 @@ int main(int argc, char **argv) {
                 Layout::EndView();
               } else {
                 const char *lbl = KEYS[idx];
-                Layout::Button({}, SizeGrow, SizeGrow, lbl, OnKeypadClicked,
-                               false, lbl);
+                Layout::Button({.roundness = 0.25f}, SizeGrow, SizeGrow, lbl,
+                               OnKeypadClicked, false, lbl);
               }
             }
             Layout::EndView();

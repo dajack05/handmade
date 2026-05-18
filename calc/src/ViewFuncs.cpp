@@ -13,10 +13,10 @@ void RenderView(const View &view) {
       (float)view.h,
   };
   if (view.bgColor.a != 0) {
-    DrawRectangleRounded(rect, view.roundness, 4, view.bgColor);
+    DrawRectangleRounded(rect, view.roundness, 8, view.bgColor);
   }
   if (view.borderThickness > 0) {
-    DrawRectangleRoundedLinesEx(rect, view.roundness, 4, view.borderThickness,
+    DrawRectangleRoundedLinesEx(rect, view.roundness, 8, view.borderThickness,
                                 view.borderColor);
   }
 }
@@ -46,7 +46,7 @@ void RenderText(const View &view) {
   if (StrLen(view.label) > 0) {
     const int fontSize = view.h / 2;
     const int textWidth = MeasureText(view.label, fontSize);
-    const int center_x = view.x + view.padding;
+    const int center_x = view.x + view.w / 2;
     const int center_y = view.y + view.h / 2;
     DrawText(view.label, center_x - textWidth / 2, center_y - fontSize / 2,
              view.h / 2, view.textColor);
