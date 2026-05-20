@@ -1,11 +1,15 @@
 #pragma once
 
+#include "src/tests/TestMacros.hpp"
 #include "src/util/String.hpp"
+#include <climits>
 #include <cstdio>
+#include <type_traits>
+
 namespace StringTest {
 
 inline bool StrLenGood() {
-  printf("Running %s: ", __PRETTY_FUNCTION__);
+  BEGIN_TEST
   const char *sample = "Test String 123";
   const int sample_len = 15;
   const int value = StrLen(sample);
@@ -13,14 +17,14 @@ inline bool StrLenGood() {
 }
 
 inline bool StrEqualGood() {
-  printf("Running %s: ", __PRETTY_FUNCTION__);
+  BEGIN_TEST
   const char *a = "This Is Good";
   const char *b = "This Is Good";
   return StrEqual(a, b);
 }
 
 inline bool StrEqualBad() {
-  printf("Running %s: ", __PRETTY_FUNCTION__);
+  BEGIN_TEST
   // Check capitalization
   const char *a = "This Is Bad";
   const char *b = "This is Bad";
@@ -39,7 +43,7 @@ inline bool StrEqualBad() {
 }
 
 inline bool StrToIntGood() {
-  printf("Running %s: ", __PRETTY_FUNCTION__);
+  BEGIN_TEST
   const char *number = "8";
   const int value = StrToInt(number);
   if (value != 8) {
@@ -58,17 +62,17 @@ inline bool StrToIntGood() {
 }
 
 inline bool StrToIntBad() {
-  printf("Running %s: ", __PRETTY_FUNCTION__);
+  BEGIN_TEST
   const char *number = " 8";
   const int value = StrToInt(number);
-  if (value != 0) {
+  if (value != INT_MAX) {
     printf("StrToIntBad. Whitespace. Expected 0 got %i\n", value);
     return false;
   }
 
   const char *numbers = "12a3";
   const int value2 = StrToInt(numbers);
-  if (value2 != 0) {
+  if (value2 != INT_MAX) {
     printf("StrToIntBad. letter. Expected 0 got %i\n", value);
     return false;
   }
@@ -77,7 +81,7 @@ inline bool StrToIntBad() {
 }
 
 inline bool StrCopyGood() {
-  printf("Running %s: ", __PRETTY_FUNCTION__);
+  BEGIN_TEST
   // Test too long
   const char *first = "This is a test string";
   char second[10] = {0};
@@ -108,6 +112,47 @@ inline bool StrCopyGood() {
       }
     }
   }
+  return true;
+}
+
+inline bool StrFromIntGood() {
+  BEGIN_TEST
+
+  const int value = 12345;
+  const char *str = StrFromInt(value);
+  if (!StrEqual(str, "12345")) {
+    printf("StrFromIntGood: Expected '12345' got '%s'\n", str);
+    return false;
+  }
+
+  return true;
+}
+
+inline bool StrFromDoubleGood() {
+  BEGIN_TEST
+
+  const double value = 123.4567;
+  const char *str = StrFromDouble(value);
+  if (!StrEqual(str, "123.4567")) {
+    printf("StrFromDoubleGood. expected str to = \"123.4567\". Got \"%s\"\n",
+           str);
+    return false;
+  }
+
+  return true;
+}
+
+inline bool StrAppendGood() {
+  BEGIN_TEST
+
+  const char *a = "123";
+  const char *b = "456";
+  const char *c = StrAppend(a, b);
+  if (!StrEqual(c, "123456")) {
+    printf("StrAppendGood: Expected '123456' got '%s'\n", c);
+    return false;
+  }
+
   return true;
 }
 
