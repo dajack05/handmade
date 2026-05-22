@@ -199,6 +199,6 @@ const char *calcResultStr() {
   } else if (resultValid) {
     return StrFromDouble(result);
   }
-  char c = '?';
-  return TextFormat("%g %c %g = %g", first, c, second, result);
+  const char *c = OPS[(int)op - 1];
+  return TextFormat("%g %s %g = %g", first, c, second, result);
 }
