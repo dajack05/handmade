@@ -71,68 +71,13 @@ int StrToInt(const char *input) {
 }
 
 const char *StrFromInt(const int value) {
-  int mValue = value;
   char (&buffer)[1024] = strBuffers.getNext();
-  unsigned int bufferIdx = 0;
-
-  // Convert the int section
-  unsigned int place = 1;
-  while (mValue > 0) {
-    const auto digit = mValue % (place * 10) / place;
-    mValue -= digit * place;
-    place *= 10;
-    if (digit >= 0 && digit <= 9) {
-      const char c = digit + '0';
-      buffer[bufferIdx++] = c;
-      if (bufferIdx >= 1024) {
-        printf("StrFromInt: Ran out of string buffer space.\n");
-        return "";
-      }
-    }
-  }
-
-  // Flip the result
-  char copy[1024] = {0};
-  StrCopy(buffer, copy, 1024);
-
-  const auto len = StrLen(copy);
-  for (auto i = 1; i <= len; i++) {
-    buffer[i - 1] = copy[len - i];
-  }
-
-  if (len < 1023) {
-    buffer[len + 1] = 0;
-  }
-
+  snprintf(buffer, 1024, "%i", value);
   return buffer;
 }
 
 const char *StrFromDouble(const double &value) {
-  const int first = (int)value;
-  const double second = value - first;
-  auto &buffer = strBuffers.getNext();
-
-  // Convert the int section
-  const auto str_first = StrFromInt(first);
-
-  // Figure out how many decimal places are stored
-  int decimal_count = 0;
-  double tval = second;
-  while (tval >= 0.0001) {
-    tval *= 10;
-    decimal_count++;
-    tval = tval - (int)tval;
-  }
-
-  tval = second;
-  for (auto i = 0; i < decimal_count; i++) {
-    tval *= 10;
-  }
-
-  const char *str_second = StrFromInt((int)tval);
-
-  const char *str_total = StrAppend(StrAppend(str_first, "."), str_second);
-  StrCopy(str_total, buffer, 1024);
-
+  char (&buffer)[1024] = strBuffers.getNext();
+  snprintf(buffer, 1024, "%g", value);
   return buffer;
 }

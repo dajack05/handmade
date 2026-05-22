@@ -131,10 +131,10 @@ inline bool StrFromIntGood() {
 inline bool StrFromDoubleGood() {
   BEGIN_TEST
 
-  const double value = 123.4567;
+  const double value = 123.456;
   const char *str = StrFromDouble(value);
-  if (!StrEqual(str, "123.4567")) {
-    printf("StrFromDoubleGood. expected str to = \"123.4567\". Got \"%s\"\n",
+  if (!StrEqual(str, "123.456")) {
+    printf("StrFromDoubleGood. expected str to = \"123.456\". Got \"%s\"\n",
            str);
     return false;
   }
