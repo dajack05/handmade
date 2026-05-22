@@ -28,6 +28,7 @@ double result = 0.0;
 double first = 0.0;
 double second = 0.0;
 double *writeTo = &first;
+bool resultValid = false;
 Calc::Op op = Calc::Op::None;
 
 int resultWritePos = 0;
@@ -50,6 +51,7 @@ void OnOpsClicked(const View &view) {
     first = 0.0;
     second = 0.0;
     writeTo = &first;
+    resultValid = false;
     op = Calc::Op::None;
   }
 }
@@ -62,15 +64,20 @@ void OnKeypadClicked(const View &view) {
   if (StrEqual(view.tag, "=")) {
     result = Calc::PerformInFix(first, second, op);
     resultWritePos = 0.0;
+    first = result;
+    writeTo = &first;
+    resultValid = true;
     return;
   }
   int key = StrToInt(view.tag);
   if (resultWritePos > 0) {
     *writeTo += (double)key / pow(10, resultWritePos);
     resultWritePos++;
-    return;
+  } else {
+    *writeTo = *writeTo * 10 + key;
   }
-  *writeTo = *writeTo * 10 + key;
+
+  result = Calc::PerformInFix(first, second, op);
 }
 
 int main(int argc, char **argv) {
@@ -188,9 +195,10 @@ void drawOperators(bool vertical) {
 
 const char *calcResultStr() {
   if (op == Calc::Op::None) {
-    // return TextFormat("%f", result);
-    return StrFromDouble(first);
+    return StrFromDouble(*writeTo);
+  } else if (resultValid) {
+    return StrFromDouble(result);
   }
-  const char *opstr = OPS[(int)op - 1];
-  return TextFormat("%f %s %f = %f", first, opstr, second, result);
+  char c = '?';
+  return TextFormat("%g %c %g = %g", first, c, second, result);
 }
