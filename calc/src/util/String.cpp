@@ -1,5 +1,6 @@
 #include "src/util/String.hpp"
 
+#include "src/lib/stb_sprintf.h"
 #include "src/util/Math.hpp"
 #include "src/util/RingBuffer.hpp"
 #include <climits>
@@ -72,13 +73,13 @@ int StrToInt(const char *input) {
 
 const char *StrFromInt(const int value) {
   char (&buffer)[1024] = strBuffers.getNext();
-  snprintf(buffer, 1024, "%i", value);
+  stbsp_snprintf(buffer, 1024, "%i", value);
   return buffer;
 }
 
 const char *StrFromDouble(const double &value) {
   char (&buffer)[1024] = strBuffers.getNext();
-  snprintf(buffer, 1024, "%g", value);
+  stbsp_snprintf(buffer, 1024, "%g", value);
   return buffer;
 }
 

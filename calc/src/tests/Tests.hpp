@@ -2,7 +2,6 @@
 
 #include "src/tests/String.hpp"
 #include "src/tests/TestMacros.hpp"
-#include <cstdio>
 
 inline bool RunTests() {
   RUN_TEST(StringTest::StrLenGood())

@@ -4,8 +4,6 @@
 #include "src/util/String.hpp"
 #include <climits>
 #include <cstdio>
-#include <mutex>
-#include <type_traits>
 
 namespace StringTest {
 

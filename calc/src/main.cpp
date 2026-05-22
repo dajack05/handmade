@@ -6,12 +6,12 @@
 #include "src/util/String.hpp"
 
 #include <cmath>
-#include <cstring>
 #include <raylib.h>
 
 void drawNumbers();
 void drawOperators(bool vertical);
 const char *calcResultStr();
+void handleKeyboardInput();
 
 const char *KEYS[12] = {
     "7", "8", "9", //
@@ -34,25 +34,57 @@ Calc::Op op = Calc::Op::None;
 int resultWritePos = 0;
 char resultStr[VIEW_MAX_LABEL_LEN] = {0};
 
-void OnOpsClicked(const View &view) {
+void handleClear() {
+  result = 0.0;
+  first = 0.0;
+  second = 0.0;
+  writeTo = &first;
+  resultValid = false;
+  op = Calc::Op::None;
+}
+
+void handleEquals() {
+  result = Calc::PerformInFix(first, second, op);
+  resultWritePos = 0.0;
+  first = result;
+  writeTo = &first;
+  resultValid = true;
+}
+
+void handleNumber(unsigned int key) {
+  if (resultWritePos > 0) {
+    *writeTo += (double)key / pow(10, resultWritePos);
+    resultWritePos++;
+  } else {
+    *writeTo = *writeTo * 10 + key;
+  }
+  result = Calc::PerformInFix(first, second, op);
+}
+
+void loadOp(Calc::Op newOp) {
   writeTo = &second;
   result = 0.0;
   resultWritePos = 0;
+  op = newOp;
+}
+
+void setDecimal() {
+  if (resultWritePos == 0) {
+    resultWritePos = 1;
+  }
+}
+
+void OnOpsClicked(const View &view) {
   if (StrEqual(view.tag, "+")) {
-    op = Calc::Op::Add;
+    loadOp(Calc::Op::Add);
   } else if (StrEqual(view.tag, "-")) {
-    op = Calc::Op::Sub;
+    loadOp(Calc::Op::Sub);
   } else if (StrEqual(view.tag, "×")) {
-    op = Calc::Op::Mult;
+    loadOp(Calc::Op::Mult);
   } else if (StrEqual(view.tag, "÷")) {
-    op = Calc::Op::Div;
+    loadOp(Calc::Op::Div);
   } else if (StrEqual(view.tag, "C")) {
-    result = 0.0;
-    first = 0.0;
-    second = 0.0;
-    writeTo = &first;
-    resultValid = false;
-    op = Calc::Op::None;
+    handleClear();
   }
 }
 
@@ -62,22 +94,11 @@ void OnKeypadClicked(const View &view) {
     return;
   }
   if (StrEqual(view.tag, "=")) {
-    result = Calc::PerformInFix(first, second, op);
-    resultWritePos = 0.0;
-    first = result;
-    writeTo = &first;
-    resultValid = true;
+    handleEquals();
     return;
   }
   int key = StrToInt(view.tag);
-  if (resultWritePos > 0) {
-    *writeTo += (double)key / pow(10, resultWritePos);
-    resultWritePos++;
-  } else {
-    *writeTo = *writeTo * 10 + key;
-  }
-
-  result = Calc::PerformInFix(first, second, op);
+  handleNumber(key);
 }
 
 int main(int argc, char **argv) {
@@ -96,6 +117,7 @@ int main(int argc, char **argv) {
   while (!WindowShouldClose()) {
     const bool layout_vertical = GetScreenWidth() < GetScreenHeight();
     frameCount++;
+    handleKeyboardInput();
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -201,4 +223,48 @@ const char *calcResultStr() {
   }
   const char *c = OPS[(int)op - 1];
   return TextFormat("%g %s %g = %g", first, c, second, result);
+}
+
+void handleKeyboardInput() {
+  if (!IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_RIGHT_SHIFT)) {
+    for (auto kp_key = 0; kp_key <= 9; kp_key++) {
+      if (IsKeyPressed(KEY_KP_0 + kp_key) || IsKeyPressed(KEY_ZERO + kp_key)) {
+        handleNumber(kp_key);
+      }
+    }
+  }
+
+  const bool equal = IsKeyPressed(KEY_EQUAL) && !IsKeyDown(KEY_LEFT_SHIFT) &&
+                     !IsKeyDown(KEY_RIGHT_SHIFT);
+  if (equal || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) ||
+      IsKeyPressed(KEY_KP_EQUAL)) {
+    handleEquals();
+  }
+
+  const bool plus = IsKeyPressed(KEY_EQUAL) &&
+                    (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT));
+  if (plus || IsKeyPressed(KEY_KP_ADD)) {
+    loadOp(Calc::Op::Add);
+  }
+
+  if (IsKeyPressed(KEY_MINUS) || IsKeyPressed(KEY_KP_SUBTRACT)) {
+    loadOp(Calc::Op::Sub);
+  }
+
+  const bool mult = IsKeyPressed(KEY_EIGHT) &&
+                    (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT));
+  if (mult || IsKeyPressed(KEY_KP_MULTIPLY)) {
+    loadOp(Calc::Op::Mult);
+  }
+
+  const bool divide = IsKeyPressed(KEY_SLASH) && !IsKeyDown(KEY_LEFT_SHIFT) &&
+                      !IsKeyDown(KEY_RIGHT_SHIFT);
+  if (divide || IsKeyPressed(KEY_KP_DIVIDE)) {
+    loadOp(Calc::Op::Div);
+  }
+
+  if (IsKeyPressed(KEY_PERIOD) && !IsKeyDown(KEY_LEFT_SHIFT) &&
+      !IsKeyDown(KEY_RIGHT_SHIFT)) {
+    setDecimal();
+  }
 }

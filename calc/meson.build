@@ -1,4 +1,4 @@
-project('calc', 'cpp')
+project('calc', 'cpp', 'c')
 
 SRCS = [
   'src/main.cpp',
@@ -8,6 +8,8 @@ SRCS = [
   'src/Calc.cpp',
 
   'src/util/String.cpp',
+
+  'src/lib/stb_sprintf.c',
 ]
 
 LIBS = [
