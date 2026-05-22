@@ -4,6 +4,7 @@
 #include "src/util/String.hpp"
 #include <climits>
 #include <cstdio>
+#include <mutex>
 #include <type_traits>
 
 namespace StringTest {
@@ -150,6 +151,19 @@ inline bool StrAppendGood() {
   const char *c = StrAppend(a, b);
   if (!StrEqual(c, "123456")) {
     printf("StrAppendGood: Expected '123456' got '%s'\n", c);
+    return false;
+  }
+
+  return true;
+}
+
+inline bool StrTrimGood() {
+  BEGIN_TEST
+
+  const char *a = "1234567890";
+  const char *b = StrTrim(a, 2);
+  if (!StrEqual(b, "12345678")) {
+    printf("StrTrimGood. Expected '12345678' got %s\n", b);
     return false;
   }
 

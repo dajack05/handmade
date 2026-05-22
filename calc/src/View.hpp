@@ -3,7 +3,7 @@
 #include "src/Colors.hpp"
 #include <raylib.h>
 
-#define VIEW_MAX_LABEL_LEN 64
+#define VIEW_MAX_LABEL_LEN 128
 #define VIEW_MAX_TAG_LEN 32
 
 enum class ViewType {

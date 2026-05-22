@@ -22,7 +22,7 @@ struct RingBuffer {
     if (writeIdx >= SIZE) {
       writeIdx = 0;
     }
-    if constexpr (std::is_array<T>::value) {
+    if (std::is_array<T>::value) {
       const unsigned int array_len = sizeof(data[0]) / sizeof(data[0][0]);
       for (auto i = 0; i < array_len; i++) {
         data[idx][i] = {};

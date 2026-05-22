@@ -41,15 +41,25 @@ void RenderButton(const View &view) {
 }
 
 void RenderText(const View &view) {
-  View nView = view;
   RenderView(view);
-  if (StrLen(view.label) > 0) {
-    const int fontSize = view.h / 2;
-    const int textWidth = MeasureText(view.label, fontSize);
-    const int center_x = view.x + view.w / 2;
-    const int center_y = view.y + view.h / 2;
-    DrawText(view.label, center_x - textWidth / 2, center_y - fontSize / 2,
-             view.h / 2, view.textColor);
+  View nView = view;
+  if (StrLen(nView.label) > 0) {
+    const int fontSize = nView.h / 2;
+    const int elipsisWidth = MeasureText("...", fontSize);
+    int textWidth = MeasureText(nView.label, fontSize);
+    bool didResize = false;
+    while (textWidth + elipsisWidth > nView.w - nView.padding * 2) {
+      didResize = true;
+      StrCopy(StrTrim(nView.label, 1), nView.label, VIEW_MAX_LABEL_LEN);
+      textWidth = MeasureText(nView.label, fontSize);
+    }
+    if (didResize) {
+      StrCopy(StrAppend(nView.label, "..."), nView.label, VIEW_MAX_LABEL_LEN);
+    }
+    const int center_x = nView.x + nView.padding;
+    const int center_y = nView.y + nView.h / 2;
+    DrawText(nView.label, center_x, center_y - fontSize / 2, nView.h / 2,
+             nView.textColor);
   }
 }
 

@@ -300,8 +300,10 @@ void Button(View view, int width, int height, const char *label,
   EndView();
 }
 
-void Text(View view, int width, int height, const char *text, const char *tag) {
+void Text(View view, int width, int height, const char *text, int padding,
+          const char *tag) {
   view.type = ViewType::Text;
+  view.padding = padding;
   StrCopy(text, view.label, VIEW_MAX_LABEL_LEN);
   BeginPane(view, width, height, tag);
   EndView();

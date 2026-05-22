@@ -81,3 +81,12 @@ const char *StrFromDouble(const double &value) {
   snprintf(buffer, 1024, "%g", value);
   return buffer;
 }
+
+const char *StrTrim(const char *text, unsigned int count) {
+  auto buffer = strBuffers.getNext();
+  const auto textLen = StrLen(text);
+  for (auto i = 0; i < 1024 && i < textLen - count; i++) {
+    buffer[i] = text[i];
+  }
+  return buffer;
+}

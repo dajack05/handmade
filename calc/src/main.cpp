@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
         },
         GetScreenWidth(), GetScreenHeight(), 0);
     {
-      Layout::BeginVBox({.bgColor = NONE}, SizeGrow, SizeFit, 10, 0);
+      Layout::BeginHBox({.bgColor = NONE}, SizeGrow, SizeFit, 10, 0);
       {
         // Result bar
         Layout::Text(
