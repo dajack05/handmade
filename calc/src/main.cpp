@@ -1,4 +1,5 @@
 #include "src/Calc.hpp"
+#include "src/Colors.hpp"
 #include "src/Layout.hpp"
 #include "src/Stats.hpp"
 #include "src/View.hpp"
@@ -20,9 +21,7 @@ const char *KEYS[12] = {
     ".", "0", "=", //
 };
 
-const char *OPS[5] = {
-    "+", "-", "×", "÷", "C",
-};
+const char *OPS[6] = {"+", "-", "×", "÷", "C", "<-"};
 
 double result = 0.0;
 double first = 0.0;
@@ -62,7 +61,7 @@ void handleNumber(unsigned int key) {
 }
 
 void loadOp(Calc::Op newOp) {
-  writeTo = &second;
+  writeTo = writeTo == &first ? &second : &first;
   result = 0.0;
   resultWritePos = 0;
   op = newOp;
@@ -71,6 +70,27 @@ void loadOp(Calc::Op newOp) {
 void setDecimal() {
   if (resultWritePos == 0) {
     resultWritePos = 1;
+  }
+}
+
+void backspace() {
+  if (resultWritePos > 1) {
+    // Delete from past remainder
+    resultWritePos--;
+    const int offset = pow(10, resultWritePos - 1);
+    double offset_value = *writeTo * offset;
+    offset_value = floor(offset_value);
+    *writeTo = offset_value / offset;
+    if (resultWritePos == 1) {
+      resultWritePos = 0;
+    }
+  } else if (*writeTo > 0) {
+    // Delete from before remainder
+    *writeTo = *writeTo / 10;
+    *writeTo = floor(*writeTo);
+  } else {
+    // Delete the operator
+    loadOp(Calc::Op::None);
   }
 }
 
@@ -85,6 +105,8 @@ void OnOpsClicked(const View &view) {
     loadOp(Calc::Op::Div);
   } else if (StrEqual(view.tag, "C")) {
     handleClear();
+  } else if (StrEqual(view.tag, "<-")) {
+    backspace();
   }
 }
 
@@ -203,13 +225,14 @@ void drawOperators(bool vertical) {
   }
   {
     // functions
-    for (auto i = 0; i < 5; i++) {
+    for (auto i = 0; i < 6; i++) {
       Layout::Button(
           {
               .roundness = 0.25f,
               .borderThickness = i + 1 == (int)op ? 4 : 0,
           },
-          SizeGrow, SizeGrow, OPS[i], OnOpsClicked, false, OPS[i]);
+          SizeGrow, SizeGrow, OPS[i], OnOpsClicked, false, OPS[i], NONE,
+          Colors.accent);
     }
   }
   Layout::EndView();
@@ -263,8 +286,13 @@ void handleKeyboardInput() {
     loadOp(Calc::Op::Div);
   }
 
-  if (IsKeyPressed(KEY_PERIOD) && !IsKeyDown(KEY_LEFT_SHIFT) &&
-      !IsKeyDown(KEY_RIGHT_SHIFT)) {
+  const bool period = IsKeyPressed(KEY_PERIOD) && !IsKeyDown(KEY_LEFT_SHIFT) &&
+                      !IsKeyDown(KEY_RIGHT_SHIFT);
+  if (period || IsKeyPressed(KEY_KP_DECIMAL)) {
     setDecimal();
+  }
+
+  if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_DELETE)) {
+    backspace();
   }
 }

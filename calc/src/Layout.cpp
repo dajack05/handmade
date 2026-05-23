@@ -289,11 +289,18 @@ void BeginPane(View view, int width, int height, const char *tag) {
 }
 
 void Button(View view, int width, int height, const char *label,
-            void (*onClickFunc)(const View &), bool accent, const char *tag) {
+            void (*onClickFunc)(const View &), bool accent, const char *tag,
+            const Color bgColor, const Color borderColor) {
   view.type = ViewType::Button;
   view.onClickFunc = onClickFunc;
-  view.bgColor = accent ? Colors.accent : Colors.primary;
-  view.borderColor = accent ? Colors.accent_lt : Colors.primary_lt;
+  if (ColorIsEqual(bgColor, NONE))
+    view.bgColor = accent ? Colors.accent : Colors.primary;
+  else
+    view.bgColor = bgColor;
+  if (ColorIsEqual(borderColor, NONE))
+    view.borderColor = accent ? Colors.accent_lt : Colors.primary_lt;
+  else
+    view.borderColor = borderColor;
   StrCopy(label, view.label, VIEW_MAX_LABEL_LEN);
 
   BeginPane(view, width, height, tag);

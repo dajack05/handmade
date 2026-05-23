@@ -3,6 +3,7 @@
 #include "src/lib/stb_sprintf.h"
 #include "src/util/Math.hpp"
 #include "src/util/RingBuffer.hpp"
+#include <cfloat>
 #include <climits>
 #include <cstdio>
 
