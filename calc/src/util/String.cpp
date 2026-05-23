@@ -1,6 +1,6 @@
 #include "src/util/String.hpp"
 
-#include "src/lib/stb_sprintf.h"
+#include "lib/stb/stb_sprintf.h"
 #include "src/util/Math.hpp"
 #include "src/util/RingBuffer.hpp"
 #include <cfloat>

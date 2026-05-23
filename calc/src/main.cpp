@@ -239,13 +239,12 @@ void drawOperators(bool vertical) {
 }
 
 const char *calcResultStr() {
+  char c = '?';
+  c = OPS[(int)op - 1][0];
   if (op == Calc::Op::None) {
-    return StrFromDouble(*writeTo);
-  } else if (resultValid) {
-    return StrFromDouble(result);
+    c = '?';
   }
-  const char *c = OPS[(int)op - 1];
-  return TextFormat("%g %s %g = %g", first, c, second, result);
+  return TextFormat("%g %c %g = %g", first, c, second, result);
 }
 
 void handleKeyboardInput() {
