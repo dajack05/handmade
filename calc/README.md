@@ -8,18 +8,19 @@ Current Libs:
 - [Raylib](https://github.com/raysan5/raylib)
 - [stb_snprintf](https://github.com/nothings/stb)
 
+## Prerequisites
+
+- [CMake](https://cmake.org/)
+- [Meson](https://mesonbuild.com/)
+- [Ninja Build](https://ninja-build.org/)
+- Clang/GCC (or I guess MSVC but I haven't tested that yet)
+
 ## Building
 
-I use [meson](https://mesonbuild.com/) when developing, but I've also included basic Makefile support.
-
-### If using [Meson](https://mesonbuild.com/)
+This project uses the [meson](https://mesonbuild.com/) build system.
 
 1. Clone/download the repo.
-2. Move to the root of the Calc project.
-3. Execute `make release`. This will use make to run all the meson commands and build the executable.
+2. Populate the raylib submodule via `git submodule update --init --recursive`.
+3. Move to the root of the Calc project.
+4. Execute `make release`. This will use make to run all the meson commands and build the executable.
 
-### If using GCC
-
-1. Clone/download the repo.
-2. Move to the root of the Calc project.
-3. Execute `make nomeson`. This will compile a release build using G++.
