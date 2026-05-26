@@ -1,12 +1,13 @@
 all:
-	meson compile -C build && mv ./build/calc .
+	cmake --build build && mv ./build/calc .
 
 setup:
-	meson setup --reconfigure ./build
+	cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 run: all
 	./calc
 
 release:
-	meson setup --buildtype=release ./build
-	meson compile -C build && mv ./build/calc .
+	cmake -S . -B build -DCMAKE_BUILD_TYPE=MinSizeRel
+	make all
+
