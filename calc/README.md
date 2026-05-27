@@ -13,6 +13,20 @@ Current Libs:
 - [CMake](https://cmake.org/)
 - Clang/GCC (or I guess MSVC but I haven't tested that yet)
 
+### MacOS
+
+Builds as-is. Assuming your C++ build system works for other projects, it should work for this.
+
+### Linux
+
+You'll need to install a development libraries for opengl and X11 stuff. The build process will error out and tell you what to install lol
+
+For Debian based systems, when it errors with something like "unable to find xrandr" you can just run `apt install libxrandr-dev`. Keep doing that process until it builds 🤷
+
+### Windows
+
+You're on your own pal... My best guess would be to suggest using something like [msys2](https://www.msys2.org/) or try building the CMake project in Visual Studio.
+
 ## Building
 
 This project uses the [meson](https://mesonbuild.com/) build system.
