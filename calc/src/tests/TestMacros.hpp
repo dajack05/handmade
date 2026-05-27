@@ -9,3 +9,17 @@
   } else {                                                                     \
     printf("PASS\n");                                                          \
   }
+
+#define ASSERT_DBL(value, expect)                                              \
+  if (value != expect) {                                                       \
+    printf("%s. FAIL expected %f got %f\n", __PRETTY_FUNCTION__, value,        \
+           expect);                                                            \
+    return false;                                                              \
+  }
+
+#define ASSERT_INT(value, expect)                                              \
+  if (value != expect) {                                                       \
+    printf("%s. FAIL expected %i got %i\n", __PRETTY_FUNCTION__, value,        \
+           expect);                                                            \
+    return false;                                                              \
+  }

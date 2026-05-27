@@ -2,6 +2,8 @@
 
 #ifndef NDEBUG
 
+#include "src/calculator/Calculator.test.hpp"
+#include "src/calculator/DigiOp.test.hpp"
 #include "src/tests/String.hpp"
 #include "src/tests/TestMacros.hpp"
 
@@ -15,6 +17,10 @@ inline bool RunTests() {
   RUN_TEST(StringTest::StrCopyGood())
   RUN_TEST(StringTest::StrFromIntGood())
   RUN_TEST(StringTest::StrFromDoubleGood())
+
+  RUN_TEST(DigiOpTest::All());
+
+  RUN_TEST(CalculatorTest::CalculateResultGood())
 
   printf("TEST GOOD 👍\n");
   return true;
