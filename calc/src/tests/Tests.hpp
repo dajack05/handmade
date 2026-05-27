@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NDEBUG
+
 #include "src/tests/String.hpp"
 #include "src/tests/TestMacros.hpp"
 
@@ -17,3 +19,9 @@ inline bool RunTests() {
   printf("TEST GOOD 👍\n");
   return true;
 }
+
+#else
+
+inline bool RunTests() { return true; }
+
+#endif // NDEBUG

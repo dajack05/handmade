@@ -1,4 +1,4 @@
 .cache/
 build/
 calc
-
+compile_commands.json
