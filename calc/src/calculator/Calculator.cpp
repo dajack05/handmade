@@ -72,10 +72,61 @@ DigiOpList prefixToPostfix(const DigiOpList &input) {
   return qu;
 }
 
+double processPostfixed(const DigiOpList &postfixedInput) {
+  Stack<DigiOp, MAX_DIGIOPLIST_SIZE> st;
+
+  for (auto i = 0; i < postfixedInput.size(); i++) {
+    const DigiOp item = postfixedInput.get(i);
+    if (item.op == Op::None) {
+      st.push(item);
+    } else {
+      if (st.size() < 2) {
+        printf("Cal::processPostfixed. ERROR. Malformed postfixedInput. Stack "
+               "size is %i. Need minimum of 2.\n",
+               st.size());
+        return 0.0;
+      }
+
+      const double b = st.pop().value;
+      const double a = st.pop().value;
+      switch (item.op) {
+
+      case Op::Add:
+        st.push({a + b});
+        break;
+      case Op::Subtract:
+        st.push({a - b});
+        break;
+      case Op::Multiply:
+        st.push({a * b});
+        break;
+      case Op::Divide:
+        st.push({a / b});
+        break;
+      case Op::None:
+      case Op::ParenOpen:
+      case Op::ParenClose:
+        printf("Cal::processPostfixed. ERROR. Item is type %i... "
+               "Invalid.\n",
+               (unsigned int)item.op);
+        return 0.0;
+      }
+    }
+  }
+
+  if (st.size() != 1) {
+    printf("Cal::processPostfixed. ERROR. Stack has %i items instead of the "
+           "expected 1 at end of process... Something went wrong.\n",
+           st.size());
+    return 0.0;
+  }
+
+  return st.pop().value;
+}
+
 double CalculateResult(const DigiOpList &input) {
   const DigiOpList postfixed = prefixToPostfix(input);
-
-  return 0.0;
+  return processPostfixed(postfixed);
 }
 
 bool InternalPostfixTest() {
@@ -113,8 +164,27 @@ bool InternalPostfixTest() {
   return 1;
 }
 
+bool InternalPostfixProcessTest() {
+  DigiOpList expected;
+  expected.push({5});
+  expected.push({4});
+  expected.push({0, Op::Multiply});
+  expected.push({3});
+  expected.push({2});
+  expected.push({0, Op::Multiply});
+  expected.push({0, Op::Add});
+  expected.push({1});
+  expected.push({0, Op::Subtract});
+
+  double result = processPostfixed(expected);
+  ASSERT_DBL(result, 25.0);
+
+  return true;
+}
+
 bool InternalTest() {
   RUN_TEST(InternalPostfixTest())
+  RUN_TEST(InternalPostfixProcessTest())
   return true;
 }
 
