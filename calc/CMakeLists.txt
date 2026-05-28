@@ -19,9 +19,8 @@ set(SRCS
     "src/Layout.cpp"
     "src/ViewFuncs.cpp"
     "src/Stats.cpp"
-    "src/Calc.cpp"
     "src/util/String.cpp"
-    "src/calculator/Calculator.cpp"
+    "src/calculator/Calc.cpp"
     "src/calculator/DigiOp.cpp"
     "lib/stb/stb_sprintf.c"
 )

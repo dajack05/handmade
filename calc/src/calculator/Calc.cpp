@@ -1,12 +1,14 @@
-#include "src/calculator/Calculator.hpp"
+#include "src/calculator/Calc.hpp"
+
 #include "src/calculator/DigiOp.hpp"
 #include "src/tests/TestMacros.hpp"
 #include "src/util/Stack.hpp"
+
 #include <cstdio>
 
-namespace Cal {
+namespace Calc {
 
-DigiOpList prefixToPostfix(const DigiOpList &input) {
+DigiOpList prefixToPostfix(DigiOpList &input) {
   DigiOpList qu;
   Stack<DigiOp, MAX_DIGIOPLIST_SIZE> st;
 
@@ -72,7 +74,7 @@ DigiOpList prefixToPostfix(const DigiOpList &input) {
   return qu;
 }
 
-double processPostfixed(const DigiOpList &postfixedInput) {
+double processPostfixed(DigiOpList &postfixedInput) {
   Stack<DigiOp, MAX_DIGIOPLIST_SIZE> st;
 
   for (auto i = 0; i < postfixedInput.size(); i++) {
@@ -124,8 +126,9 @@ double processPostfixed(const DigiOpList &postfixedInput) {
   return st.pop().value;
 }
 
-double CalculateResult(const DigiOpList &input) {
-  const DigiOpList postfixed = prefixToPostfix(input);
+double CalculateResult(DigiOpList &input) {
+  DigiOpList prefixed = input;
+  DigiOpList postfixed = prefixToPostfix(prefixed);
   return processPostfixed(postfixed);
 }
 
@@ -155,7 +158,7 @@ bool InternalPostfixTest() {
   expected.push({1});
   expected.push({0, Op::Subtract});
 
-  const DigiOpList postfixed = prefixToPostfix(input);
+  DigiOpList postfixed = prefixToPostfix(input);
   for (auto i = 0; i < expected.size(); i++) {
     ASSERT_DBL(postfixed.get(i).value, expected.get(i).value);
     ASSERT_INT(postfixed.get(i).op, expected.get(i).op);
@@ -188,4 +191,4 @@ bool InternalTest() {
   return true;
 }
 
-}; // namespace Cal
+}; // namespace Calc

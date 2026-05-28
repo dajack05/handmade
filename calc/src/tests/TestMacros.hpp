@@ -23,3 +23,10 @@
            expect, value);                                                     \
     return false;                                                              \
   }
+
+#define ASSERT_CHAR(value, expect)                                             \
+  if (value != expect) {                                                       \
+    printf("%s:%i. FAIL expected %c got %c\n", __PRETTY_FUNCTION__, __LINE__,  \
+           expect, value);                                                     \
+    return false;                                                              \
+  }

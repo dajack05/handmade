@@ -1,8 +1,10 @@
-#include "src/Calc.hpp"
+#include "lib/stb/stb_sprintf.h"
 #include "src/Colors.hpp"
 #include "src/Layout.hpp"
 #include "src/Stats.hpp"
 #include "src/View.hpp"
+#include "src/calculator/Calc.hpp"
+#include "src/calculator/DigiOp.hpp"
 #include "src/tests/Tests.hpp"
 #include "src/util/String.hpp"
 
@@ -11,7 +13,6 @@
 
 void drawNumbers();
 void drawOperators(bool vertical);
-const char *calcResultStr();
 void handleKeyboardInput();
 
 const char *KEYS[12] = {
@@ -23,86 +24,87 @@ const char *KEYS[12] = {
 
 const char *OPS[6] = {"+", "-", "×", "÷", "C", "<-"};
 
-double result = 0.0;
-double first = 0.0;
-double second = 0.0;
-double *writeTo = &first;
-bool resultValid = false;
-Calc::Op op = Calc::Op::None;
+DigiOpList eq;
 
-int resultWritePos = 0;
+double result = 0.0;
 char resultStr[VIEW_MAX_LABEL_LEN] = {0};
 
+void updateResult() {
+  result = Calc::CalculateResult(eq);
+
+  char tempResultStr[VIEW_MAX_LABEL_LEN] = {0};
+  eq.toString(tempResultStr, VIEW_MAX_LABEL_LEN);
+  stbsp_snprintf(resultStr, VIEW_MAX_LABEL_LEN, "%s = %f", tempResultStr,
+                 result);
+  printf("tempResultStr: %s\n", tempResultStr);
+}
+
 void handleClear() {
-  result = 0.0;
-  first = 0.0;
-  second = 0.0;
-  writeTo = &first;
-  resultValid = false;
-  op = Calc::Op::None;
+  eq.clear();
+  updateResult();
 }
 
 void handleEquals() {
-  result = Calc::PerformInFix(first, second, op);
-  resultWritePos = 0.0;
-  first = result;
-  writeTo = &first;
-  resultValid = true;
+  // TODO: Do we still need this?
+  updateResult();
 }
 
 void handleNumber(unsigned int key) {
-  if (resultWritePos > 0) {
-    *writeTo += (double)key / pow(10, resultWritePos);
-    resultWritePos++;
+  DigiOp &digit = eq.last();
+  if (digit.isOp()) {
+    eq.push({(double)key});
   } else {
-    *writeTo = *writeTo * 10 + key;
+    digit.value = digit.value * 10.0 + (double)key;
   }
-  result = Calc::PerformInFix(first, second, op);
+  // TODO: Handle decimals...
+  // if (resultWritePos > 0) {
+  //   *writeTo += (double)key / pow(10, resultWritePos);
+  //   resultWritePos++;
+  // }
+  updateResult();
 }
 
-void loadOp(Calc::Op newOp) {
-  writeTo = writeTo == &first ? &second : &first;
-  result = 0.0;
-  resultWritePos = 0;
-  op = newOp;
-}
+void loadOp(Op newOp) { eq.push({0.0, newOp}); }
 
 void setDecimal() {
-  if (resultWritePos == 0) {
-    resultWritePos = 1;
-  }
+  // TODO
+  //  if (resultWritePos == 0) {
+  //    resultWritePos = 1;
+  //  }
 }
 
 void backspace() {
-  if (resultWritePos > 1) {
-    // Delete from past remainder
-    resultWritePos--;
-    const int offset = pow(10, resultWritePos - 1);
-    double offset_value = *writeTo * offset;
-    offset_value = floor(offset_value);
-    *writeTo = offset_value / offset;
-    if (resultWritePos == 1) {
-      resultWritePos = 0;
-    }
-  } else if (*writeTo > 0) {
-    // Delete from before remainder
-    *writeTo = *writeTo / 10;
-    *writeTo = floor(*writeTo);
+  DigiOp &digit = eq.last();
+  if (digit.value >= 10) {
+    digit.value = floor(digit.value / 10.0f);
   } else {
-    // Delete the operator
-    loadOp(Calc::Op::None);
+    eq.erase(eq.size() - 1);
   }
+  updateResult();
+
+  // TODO: Handle decimals
+  // if (resultWritePos > 1) {
+  //   // Delete from past remainder
+  //   resultWritePos--;
+  //   const int offset = pow(10, resultWritePos - 1);
+  //   double offset_value = *writeTo * offset;
+  //   offset_value = floor(offset_value);
+  //   *writeTo = offset_value / offset;
+  //   if (resultWritePos == 1) {
+  //     resultWritePos = 0;
+  //   }
+  // }
 }
 
 void OnOpsClicked(const View &view) {
   if (StrEqual(view.tag, "+")) {
-    loadOp(Calc::Op::Add);
+    loadOp(Op::Add);
   } else if (StrEqual(view.tag, "-")) {
-    loadOp(Calc::Op::Sub);
+    loadOp(Op::Subtract);
   } else if (StrEqual(view.tag, "×")) {
-    loadOp(Calc::Op::Mult);
+    loadOp(Op::Multiply);
   } else if (StrEqual(view.tag, "÷")) {
-    loadOp(Calc::Op::Div);
+    loadOp(Op::Divide);
   } else if (StrEqual(view.tag, "C")) {
     handleClear();
   } else if (StrEqual(view.tag, "<-")) {
@@ -111,10 +113,11 @@ void OnOpsClicked(const View &view) {
 }
 
 void OnKeypadClicked(const View &view) {
-  if (StrEqual(view.tag, ".") && resultWritePos == 0) {
-    resultWritePos = 1;
-    return;
-  }
+  // TODO: Handle decimals
+  // if (StrEqual(view.tag, ".") && resultWritePos == 0) {
+  //   resultWritePos = 1;
+  //   return;
+  // }
   if (StrEqual(view.tag, "=")) {
     handleEquals();
     return;
@@ -162,7 +165,7 @@ int main(int argc, char **argv) {
                 .bgColor = Colors.light,
                 .textColor = Colors.dark,
             },
-            SizeGrow, 50, calcResultStr());
+            SizeGrow, 50, resultStr);
       }
       Layout::EndView();
 
@@ -229,22 +232,12 @@ void drawOperators(bool vertical) {
       Layout::Button(
           {
               .roundness = 0.25f,
-              .borderThickness = i + 1 == (int)op ? 4 : 0,
           },
           SizeGrow, SizeGrow, OPS[i], OnOpsClicked, false, OPS[i], NONE,
           Colors.accent);
     }
   }
   Layout::EndView();
-}
-
-const char *calcResultStr() {
-  char c = '?';
-  c = OPS[(int)op - 1][0];
-  if (op == Calc::Op::None) {
-    c = '?';
-  }
-  return TextFormat("%g %c %g = %g", first, c, second, result);
 }
 
 void handleKeyboardInput() {
@@ -266,23 +259,23 @@ void handleKeyboardInput() {
   const bool plus = IsKeyPressed(KEY_EQUAL) &&
                     (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT));
   if (plus || IsKeyPressed(KEY_KP_ADD)) {
-    loadOp(Calc::Op::Add);
+    loadOp(Op::Add);
   }
 
   if (IsKeyPressed(KEY_MINUS) || IsKeyPressed(KEY_KP_SUBTRACT)) {
-    loadOp(Calc::Op::Sub);
+    loadOp(Op::Subtract);
   }
 
   const bool mult = IsKeyPressed(KEY_EIGHT) &&
                     (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT));
   if (mult || IsKeyPressed(KEY_KP_MULTIPLY)) {
-    loadOp(Calc::Op::Mult);
+    loadOp(Op::Multiply);
   }
 
   const bool divide = IsKeyPressed(KEY_SLASH) && !IsKeyDown(KEY_LEFT_SHIFT) &&
                       !IsKeyDown(KEY_RIGHT_SHIFT);
   if (divide || IsKeyPressed(KEY_KP_DIVIDE)) {
-    loadOp(Calc::Op::Div);
+    loadOp(Op::Divide);
   }
 
   const bool period = IsKeyPressed(KEY_PERIOD) && !IsKeyDown(KEY_LEFT_SHIFT) &&

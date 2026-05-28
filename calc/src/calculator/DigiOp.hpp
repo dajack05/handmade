@@ -14,49 +14,27 @@ enum class Op {
   Multiply,
 };
 
+static const char OpChar[] = {
+    '!', '(', ')', '-', '+', '/', '*',
+};
+
 struct DigiOp {
   double value = 0.0;
   Op op = Op::None;
 
-  static void PrettyPrint(const DigiOp &item) {
-    if (item.op == Op::None) {
-      printf("%f", item.value);
-    } else {
-      char opStr[12] = {0};
-      switch (item.op) {
-      case Op::None:
-        StrCopy("None", opStr, 12);
-        break;
-      case Op::ParenClose:
-        StrCopy("ParenClose", opStr, 12);
-        break;
-      case Op::ParenOpen:
-        StrCopy("ParenOpen", opStr, 12);
-        break;
-      case Op::Add:
-        StrCopy("Add", opStr, 12);
-        break;
-      case Op::Subtract:
-        StrCopy("Subtract", opStr, 12);
-        break;
-      case Op::Multiply:
-        StrCopy("Multiply", opStr, 12);
-        break;
-      case Op::Divide:
-        StrCopy("Divide", opStr, 12);
-        break;
-      }
-      printf("%s", opStr);
-    }
-  }
+  static void PrettyPrint(const DigiOp &item);
+  inline const bool isOp() const { return op != Op::None; }
 };
 
 class DigiOpList {
 public:
   const unsigned int size() const;
-  const DigiOp get(unsigned int index) const;
+  DigiOp &get(unsigned int index);
   const unsigned int push(const DigiOp digiOp);
   void erase(unsigned int index);
+  void clear();
+  DigiOp &last();
+  void toString(char *destination, unsigned int maxSize) const;
 
   inline void prettyPrint(void (*printFunc)(const DigiOp &item)) const {
     printf("DigiOpList[%i]:[", MAX_DIGIOPLIST_SIZE);
