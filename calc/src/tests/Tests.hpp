@@ -1,5 +1,6 @@
 #pragma once
 
+#include "src/calculator/Calculator.hpp"
 #ifndef NDEBUG
 
 #include "src/calculator/Calculator.test.hpp"
@@ -24,6 +25,8 @@ inline bool RunTests() {
 
   RUN_TEST(StackTest::All())
   RUN_TEST(QueueTest::All())
+
+  RUN_TEST(Cal::InternalTest())
 
   RUN_TEST(CalculatorTest::CalculateResultGood())
 

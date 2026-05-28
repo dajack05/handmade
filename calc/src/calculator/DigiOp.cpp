@@ -1,9 +1,9 @@
 #include "src/calculator/DigiOp.hpp"
 #include <cstdio>
 
-const unsigned int DigiOpList::size() { return writeIdx; }
+const unsigned int DigiOpList::size() const { return writeIdx; }
 
-const DigiOp DigiOpList::get(unsigned int index) {
+const DigiOp DigiOpList::get(unsigned int index) const {
   if (index < writeIdx) {
     return data[index];
   }

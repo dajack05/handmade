@@ -6,4 +6,6 @@ namespace Cal {
 
 double CalculateResult(const DigiOpList &input);
 
+bool InternalTest();
+
 }; // namespace Cal

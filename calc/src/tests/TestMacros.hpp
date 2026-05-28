@@ -7,7 +7,7 @@
     printf("FAIL\n");                                                          \
     return false;                                                              \
   } else {                                                                     \
-    printf("\n");                                                              \
+    printf("PASS\n");                                                          \
   }
 
 #define ASSERT_DBL(value, expect)                                              \

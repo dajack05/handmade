@@ -20,7 +20,18 @@ public:
     return data[--writeIdx];
   }
 
-  inline const unsigned int size() { return writeIdx; }
+  inline const unsigned int size() const { return writeIdx; }
+
+  inline void prettyPrint(void (*printFunc)(const T &item)) const {
+    printf("Stack[%i]:[", SIZE);
+    for (auto i = 0; i < size(); i++) {
+      printFunc(data[i]);
+      if (i < size() - 1) {
+        printf(", ");
+      }
+    }
+    printf("]\n");
+  }
 
 private:
   T data[SIZE] = {};
