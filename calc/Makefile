@@ -7,6 +7,9 @@ setup:
 run: all
 	./calc
 
+debug: all
+	lldb ./calc
+
 release:
 	cmake -S . -B build -DCMAKE_BUILD_TYPE=MinSizeRel
 	make all

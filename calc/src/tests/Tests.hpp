@@ -6,6 +6,8 @@
 #include "src/calculator/DigiOp.test.hpp"
 #include "src/tests/String.hpp"
 #include "src/tests/TestMacros.hpp"
+#include "src/util/Queue.test.hpp"
+#include "src/util/Stack.test.hpp"
 
 inline bool RunTests() {
   RUN_TEST(StringTest::StrLenGood())
@@ -18,7 +20,10 @@ inline bool RunTests() {
   RUN_TEST(StringTest::StrFromIntGood())
   RUN_TEST(StringTest::StrFromDoubleGood())
 
-  RUN_TEST(DigiOpTest::All());
+  RUN_TEST(DigiOpTest::All())
+
+  RUN_TEST(StackTest::All())
+  RUN_TEST(QueueTest::All())
 
   RUN_TEST(CalculatorTest::CalculateResultGood())
 

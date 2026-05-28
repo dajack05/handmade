@@ -3,9 +3,16 @@
 
 namespace Cal {
 
-DigiOpList
+DigiOpList prefixToPostfix(const DigiOpList &input) {
+  DigiOpList list;
 
-    double
-    CalculateResult(const DigiOpList &input) {}
+  return list;
+}
+
+double CalculateResult(const DigiOpList &input) {
+  const DigiOpList postfixed = prefixToPostfix(input);
+
+  return 0.0;
+}
 
 }; // namespace Cal
