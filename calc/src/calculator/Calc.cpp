@@ -20,10 +20,6 @@ DigiOpList prefixToPostfix(DigiOpList &input) {
     }
 
     // Is an operator
-    if (st.size() == 0) {
-      st.push(item);
-      continue;
-    }
 
     if (item.op == Op::ParenOpen) {
       st.push(item);
@@ -47,6 +43,7 @@ DigiOpList prefixToPostfix(DigiOpList &input) {
         printf("Cal::prefixToPostfix. ERROR Failed to find '(' in stack.\n");
         return {};
       }
+      continue;
     }
 
     const DigiOp topItem = st.pop();
@@ -168,16 +165,19 @@ bool InternalPostfixTest() {
 }
 
 bool InternalPostfixProcessTest() {
+  BEGIN_TEST
   DigiOpList expected;
-  expected.push({5});
-  expected.push({4});
-  expected.push({0, Op::Multiply});
-  expected.push({3});
-  expected.push({2});
-  expected.push({0, Op::Multiply});
-  expected.push({0, Op::Add});
-  expected.push({1});
-  expected.push({0, Op::Subtract});
+  expected.pushAll({
+      {5},
+      {4},
+      {Op::Multiply},
+      {3},
+      {2},
+      {Op::Multiply},
+      {Op::Add},
+      {1},
+      {Op::Subtract},
+  });
 
   double result = processPostfixed(expected);
   ASSERT_DBL(result, 25.0);
@@ -185,9 +185,50 @@ bool InternalPostfixProcessTest() {
   return true;
 }
 
+bool InternalPostfixSpecialTest() {
+  BEGIN_TEST
+  DigiOpList list;
+  list.pushAll({
+      {12},
+      {Op::Multiply},
+      {Op::ParenOpen},
+      {3},
+      {Op::Subtract},
+      {10},
+      {Op::ParenClose},
+  });
+
+  DigiOpList expect;
+  expect.pushAll({
+      {12},
+      {3},
+      {10},
+      {Op::Subtract},
+      {Op::Multiply},
+  });
+
+  DigiOpList result = prefixToPostfix(list);
+  char resultStr[128] = {0};
+  result.toString(resultStr, 128);
+  printf("result: %s\n", resultStr);
+  ASSERT_INT(result.size(), expect.size())
+
+  for (auto i = 0; i < result.size(); i++) {
+    const DigiOp digit = result.get(i);
+    if (digit.isOp()) {
+      ASSERT_INT((int)digit.op, (int)expect.get(i).op);
+    } else {
+      ASSERT_DBL(digit.value, expect.get(i).value);
+    }
+  }
+
+  return true;
+}
+
 bool InternalTest() {
   RUN_TEST(InternalPostfixTest())
   RUN_TEST(InternalPostfixProcessTest())
+  RUN_TEST(InternalPostfixSpecialTest())
   return true;
 }
 

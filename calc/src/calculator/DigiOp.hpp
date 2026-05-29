@@ -1,7 +1,7 @@
 #pragma once
 
-#include "src/util/String.hpp"
 #include <cstdio>
+#include <initializer_list>
 #define MAX_DIGIOPLIST_SIZE 2048
 
 enum class Op {
@@ -22,6 +22,11 @@ struct DigiOp {
   double value = 0.0;
   Op op = Op::None;
 
+  DigiOp() = default;
+  DigiOp(double value) : value(value) {}
+  DigiOp(Op op) : op(op) {}
+  DigiOp(double value, Op op) : value(value), op(op) {}
+
   static void PrettyPrint(const DigiOp &item);
   inline const bool isOp() const { return op != Op::None; }
 };
@@ -30,7 +35,9 @@ class DigiOpList {
 public:
   const unsigned int size() const;
   DigiOp &get(unsigned int index);
-  const unsigned int push(const DigiOp digiOp);
+
+  void push(const DigiOp digiOp);
+  void pushAll(std::initializer_list<const DigiOp> digiOps);
   void erase(unsigned int index);
   void clear();
   DigiOp &last();

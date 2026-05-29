@@ -22,7 +22,7 @@ const char *KEYS[12] = {
     ".", "0", "=", //
 };
 
-const char *OPS[6] = {"+", "-", "×", "÷", "C", "<-"};
+const char *OPS[8] = {"(", ")", "+", "-", "×", "÷", "C", "<-"};
 
 DigiOpList eq;
 
@@ -36,11 +36,11 @@ void updateResult() {
   eq.toString(tempResultStr, VIEW_MAX_LABEL_LEN);
   stbsp_snprintf(resultStr, VIEW_MAX_LABEL_LEN, "%s = %f", tempResultStr,
                  result);
-  printf("tempResultStr: %s\n", tempResultStr);
 }
 
 void handleClear() {
   eq.clear();
+  eq.push({0.0});
   updateResult();
 }
 
@@ -64,7 +64,10 @@ void handleNumber(unsigned int key) {
   updateResult();
 }
 
-void loadOp(Op newOp) { eq.push({0.0, newOp}); }
+void loadOp(Op newOp) {
+  eq.push({0.0, newOp});
+  updateResult();
+}
 
 void setDecimal() {
   // TODO
@@ -105,6 +108,10 @@ void OnOpsClicked(const View &view) {
     loadOp(Op::Multiply);
   } else if (StrEqual(view.tag, "÷")) {
     loadOp(Op::Divide);
+  } else if (StrEqual(view.tag, "(")) {
+    loadOp(Op::ParenOpen);
+  } else if (StrEqual(view.tag, ")")) {
+    loadOp(Op::ParenClose);
   } else if (StrEqual(view.tag, "C")) {
     handleClear();
   } else if (StrEqual(view.tag, "<-")) {
@@ -137,6 +144,7 @@ int main(int argc, char **argv) {
   SetWindowMinSize(300, 300);
   SetTargetFPS(60);
 
+  handleClear();
   unsigned long frameCount = 0;
 
   while (!WindowShouldClose()) {
@@ -228,7 +236,7 @@ void drawOperators(bool vertical) {
   }
   {
     // functions
-    for (auto i = 0; i < 6; i++) {
+    for (auto i = 0; i < 8; i++) {
       Layout::Button(
           {
               .roundness = 0.25f,

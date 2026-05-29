@@ -18,18 +18,9 @@ DigiOp &DigiOpList::last() {
   if (writeIdx > 0) {
     return data[writeIdx - 1];
   }
-  return data[writeIdx++];
-}
-
-const unsigned int DigiOpList::push(const DigiOp digiOp) {
-  if (writeIdx >= MAX_DIGIOPLIST_SIZE) {
-    printf("DigiOpList::push. RAN OUT OF ROOM. Consider increasing "
-           "MAX_DIGIOPLIST_SIZE.\n");
-    return 0;
-  }
-  const unsigned int idx = writeIdx++;
-  data[idx] = digiOp;
-  return idx;
+  printf("DigiOpList::last. WARN. Called last() on empty list... Response "
+         "invalid.\n");
+  return data[0];
 }
 
 void DigiOpList::erase(unsigned int index) {
@@ -44,6 +35,22 @@ void DigiOpList::erase(unsigned int index) {
     data[i] = data[i + 1];
   }
   writeIdx--;
+}
+
+void DigiOpList::push(const DigiOp digiOp) {
+  if (writeIdx >= MAX_DIGIOPLIST_SIZE) {
+    printf("DigiOpList::push. RAN OUT OF ROOM. Consider increasing "
+           "MAX_DIGIOPLIST_SIZE.\n");
+    return;
+  }
+  const unsigned int idx = writeIdx++;
+  data[idx] = digiOp;
+}
+
+void DigiOpList::pushAll(std::initializer_list<const DigiOp> digiOps) {
+  for (const auto op : digiOps) {
+    push(op);
+  }
 }
 
 void DigiOpList::clear() { writeIdx = 0; }
