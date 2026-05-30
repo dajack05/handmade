@@ -132,28 +132,32 @@ double CalculateResult(DigiOpList &input) {
 bool InternalPostfixTest() {
   BEGIN_TEST
   DigiOpList input;
-  input.push({0, Op::ParenOpen});
-  input.push({5});
-  input.push({0, Op::Multiply});
-  input.push({4});
-  input.push({0, Op::Add});
-  input.push({3});
-  input.push({0, Op::Multiply});
-  input.push({2});
-  input.push({0, Op::ParenClose});
-  input.push({0, Op::Subtract});
-  input.push({1});
+  input.pushAll({
+      Op::ParenOpen,
+      5,
+      Op::Multiply,
+      4,
+      Op::Add,
+      3,
+      Op::Multiply,
+      2,
+      Op::ParenClose,
+      Op::Subtract,
+      1,
+  });
 
   DigiOpList expected;
-  expected.push({5});
-  expected.push({4});
-  expected.push({0, Op::Multiply});
-  expected.push({3});
-  expected.push({2});
-  expected.push({0, Op::Multiply});
-  expected.push({0, Op::Add});
-  expected.push({1});
-  expected.push({0, Op::Subtract});
+  expected.pushAll({
+      5,
+      4,
+      Op::Multiply,
+      3,
+      2,
+      Op::Multiply,
+      Op::Add,
+      1,
+      Op::Subtract,
+  });
 
   DigiOpList postfixed = prefixToPostfix(input);
   for (auto i = 0; i < expected.size(); i++) {
@@ -168,15 +172,15 @@ bool InternalPostfixProcessTest() {
   BEGIN_TEST
   DigiOpList expected;
   expected.pushAll({
-      {5},
-      {4},
-      {Op::Multiply},
-      {3},
-      {2},
-      {Op::Multiply},
-      {Op::Add},
-      {1},
-      {Op::Subtract},
+      5,
+      4,
+      Op::Multiply,
+      3,
+      2,
+      Op::Multiply,
+      Op::Add,
+      1,
+      Op::Subtract,
   });
 
   double result = processPostfixed(expected);
@@ -189,22 +193,22 @@ bool InternalPostfixSpecialTest() {
   BEGIN_TEST
   DigiOpList list;
   list.pushAll({
-      {12},
-      {Op::Multiply},
-      {Op::ParenOpen},
-      {3},
-      {Op::Subtract},
-      {10},
-      {Op::ParenClose},
+      12,
+      Op::Multiply,
+      Op::ParenOpen,
+      3,
+      Op::Subtract,
+      10,
+      Op::ParenClose,
   });
 
   DigiOpList expect;
   expect.pushAll({
-      {12},
-      {3},
-      {10},
-      {Op::Subtract},
-      {Op::Multiply},
+      12,
+      3,
+      10,
+      Op::Subtract,
+      Op::Multiply,
   });
 
   DigiOpList result = prefixToPostfix(list);

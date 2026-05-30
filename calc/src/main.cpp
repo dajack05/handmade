@@ -34,25 +34,27 @@ void updateResult() {
 
   char tempResultStr[VIEW_MAX_LABEL_LEN] = {0};
   eq.toString(tempResultStr, VIEW_MAX_LABEL_LEN);
-  stbsp_snprintf(resultStr, VIEW_MAX_LABEL_LEN, "%s = %f", tempResultStr,
+  stbsp_snprintf(resultStr, VIEW_MAX_LABEL_LEN, "%s = %g", tempResultStr,
                  result);
 }
 
 void handleClear() {
   eq.clear();
-  eq.push({0.0});
+  eq.push(0.0);
   updateResult();
 }
 
 void handleEquals() {
   // TODO: Do we still need this?
+  eq.clear();
+  eq.push(result);
   updateResult();
 }
 
 void handleNumber(unsigned int key) {
   DigiOp &digit = eq.last();
   if (digit.isOp()) {
-    eq.push({(double)key});
+    eq.push(key);
   } else {
     digit.value = digit.value * 10.0 + (double)key;
   }

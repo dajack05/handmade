@@ -10,6 +10,9 @@ run: all
 debug: all
 	lldb ./calc
 
+clean:
+	cmake --build build --target clean
+
 release:
 	cmake -S . -B build -DCMAKE_BUILD_TYPE=MinSizeRel
 	make all

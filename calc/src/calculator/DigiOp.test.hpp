@@ -9,10 +9,9 @@ namespace DigiOpTest {
 inline bool PushTest() {
   BEGIN_TEST
   DigiOpList list;
-  const DigiOp el{123.456, Op::None};
-  list.push(el);
+  list.push(123.456);
   ASSERT_DBL(list.get(0).value, 123.456)
-  list.push({222.22, Op::None});
+  list.push(222.22);
   ASSERT_DBL(list.get(1).value, 222.22)
   return true;
 }
@@ -20,11 +19,10 @@ inline bool PushTest() {
 inline bool SizeTest() {
   BEGIN_TEST
   DigiOpList list;
-  const DigiOp el{123.456, Op::None};
   ASSERT_INT(list.size(), 0)
-  list.push(el);
+  list.push(123.456);
   ASSERT_INT(list.size(), 1)
-  list.push(el);
+  list.push(123.456);
   ASSERT_INT(list.size(), 2)
   return true;
 }
@@ -33,7 +31,7 @@ inline bool EraseTest() {
   BEGIN_TEST
   DigiOpList list;
   for (auto i = 0; i < 10; i++) {
-    list.push({(double)i, Op::None});
+    list.push((double)i);
   }
   ASSERT_INT(list.size(), 10);
   for (auto i = 0; i < 10; i++) {
@@ -50,7 +48,7 @@ inline bool EraseTest() {
 inline bool GetTest() {
   BEGIN_TEST
   DigiOpList list;
-  list.push({123, Op::None});
+  list.push(123.0);
   ASSERT_DBL(list.get(0).value, 123.0)
   return true;
 }
@@ -59,12 +57,12 @@ inline bool LimitsTest() {
   BEGIN_TEST
   DigiOpList list;
   for (auto i = 0; i < MAX_DIGIOPLIST_SIZE; i++) {
-    list.push({(double)i, Op::None});
+    list.push((double)i);
   }
   ASSERT_INT(list.size(), MAX_DIGIOPLIST_SIZE)
 
   // Warning should print here
-  list.push({123.123, Op::None});
+  list.push(123.123);
   ASSERT_INT(list.size(), MAX_DIGIOPLIST_SIZE)
 
   return true;
@@ -74,7 +72,7 @@ inline bool ClearTest() {
   BEGIN_TEST
   DigiOpList list;
   for (auto i = 0; i < 10; i++) {
-    list.push({(double)i});
+    list.push((double)i);
   }
   ASSERT_INT(list.size(), 10);
   list.clear();
@@ -86,7 +84,7 @@ inline bool LastTest() {
   BEGIN_TEST
   DigiOpList list;
   for (auto i = 0; i < 10; i++) {
-    list.push({(double)i});
+    list.push((double)i);
   }
 
   ASSERT_DBL(list.last().value, 9.0);
@@ -97,18 +95,20 @@ inline bool LastTest() {
 inline bool ToStringTest() {
   BEGIN_TEST
   DigiOpList list;
-  list.push({1});
-  list.push({0, Op::Add});
-  list.push({2});
-  list.push({0, Op::Subtract});
-  list.push({3});
-  list.push({0, Op::Multiply});
-  list.push({4});
-  list.push({0, Op::Divide});
-  list.push({5});
-  list.push({0, Op::ParenOpen});
-  list.push({6});
-  list.push({0, Op::ParenClose});
+  list.pushAll({
+      1,
+      Op::Add,
+      2,
+      Op::Subtract,
+      3,
+      Op::Multiply,
+      4,
+      Op::Divide,
+      5,
+      Op::ParenOpen,
+      6,
+      Op::ParenClose,
+  });
 
   char str[512] = {0};
   list.toString(str, 512);

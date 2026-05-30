@@ -37,6 +37,8 @@ public:
   DigiOp &get(unsigned int index);
 
   void push(const DigiOp digiOp);
+  inline void push(const double digit) { push(DigiOp{digit}); }
+  inline void push(const Op op) { push(DigiOp{op}); }
   void pushAll(std::initializer_list<const DigiOp> digiOps);
   void erase(unsigned int index);
   void clear();
