@@ -2,6 +2,7 @@
 
 #include "src/View.hpp"
 #include "src/util/String.hpp"
+#include <cstdio>
 #include <raylib.h>
 
 namespace ViewFuncs {
@@ -48,10 +49,17 @@ void RenderText(const View &view) {
     const int elipsisWidth = MeasureText("...", fontSize);
     int textWidth = MeasureText(nView.label, fontSize);
     bool didResize = false;
+    int count = 0;
     while (textWidth + elipsisWidth > nView.w - nView.padding * 2) {
       didResize = true;
       StrCopy(StrTrim(nView.label, 1), nView.label, VIEW_MAX_LABEL_LEN);
       textWidth = MeasureText(nView.label, fontSize);
+      count++;
+      if (count > 1000) {
+        printf("RenderText() looped more than 1000 times to try and trim "
+               "text... Probably an issue...\n");
+        break;
+      }
     }
     if (didResize) {
       StrCopy(StrAppend(nView.label, "..."), nView.label, VIEW_MAX_LABEL_LEN);

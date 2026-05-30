@@ -10,8 +10,6 @@
 #include "src/util/String.hpp"
 
 #include <cmath>
-#include <cstdio>
-#include <ratio>
 #include <raylib.h>
 
 void drawNumbers();
@@ -31,16 +29,8 @@ DigiOpList eq;
 
 double result = 0.0;
 int decimal = 0;
-char resultStr[VIEW_MAX_LABEL_LEN] = {0};
 
-void updateResult() {
-  result = Calc::CalculateResult(eq);
-
-  char tempResultStr[VIEW_MAX_LABEL_LEN] = {0};
-  eq.toString(tempResultStr, VIEW_MAX_LABEL_LEN);
-  stbsp_snprintf(resultStr, VIEW_MAX_LABEL_LEN, "%s%s= %g", tempResultStr,
-                 decimal == 1 ? ". " : " ", result);
-}
+void updateResult() { result = Calc::CalculateResult(eq); }
 
 void handleClear() {
   decimal = 0;
@@ -175,17 +165,30 @@ int main(int argc, char **argv) {
         },
         GetScreenWidth(), GetScreenHeight(), 0);
     {
-      Layout::BeginHBox({.bgColor = NONE}, SizeGrow, SizeFit, 10, 0);
+      Layout::BeginVBox({.bgColor = NONE}, SizeGrow, SizeFit, 10, 5);
       {
         // Result bar
+        char eqStr[VIEW_MAX_LABEL_LEN] = {0};
+        eq.toString(eqStr, VIEW_MAX_LABEL_LEN);
         Layout::Text(
             {
                 .roundness = 0.25f,
-                .padding = 5,
                 .bgColor = Colors.light,
                 .textColor = Colors.dark,
             },
-            SizeGrow, 50, resultStr);
+            SizeGrow, 50, eqStr, 5);
+        Layout::BeginHBox({}, SizeGrow, 50, 0, 5);
+        {
+          Layout::Text({}, 120, 50, "Result:");
+          Layout::Text(
+              {
+                  .roundness = 0.25f,
+                  .bgColor = Colors.light,
+                  .textColor = Colors.dark,
+              },
+              SizeGrow, SizeGrow, StrFromDouble(result), 5);
+        }
+        Layout::EndView();
       }
       Layout::EndView();
 
