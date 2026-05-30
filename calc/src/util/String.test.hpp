@@ -168,4 +168,17 @@ inline bool StrTrimGood() {
   return true;
 }
 
+inline bool All() {
+  RUN_TEST(StrLenGood())
+  RUN_TEST(StrEqualBad())
+  RUN_TEST(StrEqualGood())
+  RUN_TEST(StrAppendGood())
+  RUN_TEST(StrToIntGood())
+  RUN_TEST(StrToIntBad())
+  RUN_TEST(StrCopyGood())
+  RUN_TEST(StrFromIntGood())
+  RUN_TEST(StrFromDoubleGood())
+  return true;
+}
+
 }; // namespace StringTest

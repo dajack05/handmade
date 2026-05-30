@@ -6,9 +6,12 @@
 #include "src/calculator/Calc.hpp"
 #include "src/calculator/DigiOp.hpp"
 #include "src/tests/Tests.hpp"
+#include "src/util/Math.hpp"
 #include "src/util/String.hpp"
 
 #include <cmath>
+#include <cstdio>
+#include <ratio>
 #include <raylib.h>
 
 void drawNumbers();
@@ -27,6 +30,7 @@ const char *OPS[8] = {"(", ")", "+", "-", "×", "÷", "C", "<-"};
 DigiOpList eq;
 
 double result = 0.0;
+int decimal = 0;
 char resultStr[VIEW_MAX_LABEL_LEN] = {0};
 
 void updateResult() {
@@ -34,20 +38,21 @@ void updateResult() {
 
   char tempResultStr[VIEW_MAX_LABEL_LEN] = {0};
   eq.toString(tempResultStr, VIEW_MAX_LABEL_LEN);
-  stbsp_snprintf(resultStr, VIEW_MAX_LABEL_LEN, "%s = %g", tempResultStr,
-                 result);
+  stbsp_snprintf(resultStr, VIEW_MAX_LABEL_LEN, "%s%s= %g", tempResultStr,
+                 decimal == 1 ? ". " : " ", result);
 }
 
 void handleClear() {
+  decimal = 0;
   eq.clear();
   eq.push(0.0);
   updateResult();
 }
 
 void handleEquals() {
-  // TODO: Do we still need this?
   eq.clear();
   eq.push(result);
+  decimal = 0;
   updateResult();
 }
 
@@ -55,50 +60,56 @@ void handleNumber(unsigned int key) {
   DigiOp &digit = eq.last();
   if (digit.isOp()) {
     eq.push(key);
+  } else if (decimal > 0) {
+    digit.value = digit.value + (double)key / pow(10, decimal);
+    decimal++;
   } else {
     digit.value = digit.value * 10.0 + (double)key;
   }
-  // TODO: Handle decimals...
-  // if (resultWritePos > 0) {
-  //   *writeTo += (double)key / pow(10, resultWritePos);
-  //   resultWritePos++;
-  // }
   updateResult();
 }
 
 void loadOp(Op newOp) {
+  decimal = 0;
   eq.push({0.0, newOp});
   updateResult();
 }
 
 void setDecimal() {
-  // TODO
-  //  if (resultWritePos == 0) {
-  //    resultWritePos = 1;
-  //  }
+  if (decimal == 0) {
+    decimal = 1;
+  }
+  updateResult();
 }
 
 void backspace() {
   DigiOp &digit = eq.last();
-  if (digit.value >= 10) {
+  if (decimal > 1) {
+    decimal--;
+    const int offset = pow(10, decimal - 1);
+    double offset_value = digit.value * offset;
+    offset_value = floor(offset_value);
+    digit.value = offset_value / offset;
+    if (decimal == 1) {
+      decimal = 0;
+    }
+  } else if (digit.value >= 10) {
     digit.value = floor(digit.value / 10.0f);
   } else {
     eq.erase(eq.size() - 1);
+    decimal = 0;
+    // Set the decimal if appropriate
+    if (eq.size() > 0) {
+      const DigiOp newDigit = eq.last();
+      if (!newDigit.isOp()) {
+        decimal = decimalCount(newDigit.value) + 1;
+      }
+    }
+  }
+  if (eq.size() == 0) {
+    handleClear();
   }
   updateResult();
-
-  // TODO: Handle decimals
-  // if (resultWritePos > 1) {
-  //   // Delete from past remainder
-  //   resultWritePos--;
-  //   const int offset = pow(10, resultWritePos - 1);
-  //   double offset_value = *writeTo * offset;
-  //   offset_value = floor(offset_value);
-  //   *writeTo = offset_value / offset;
-  //   if (resultWritePos == 1) {
-  //     resultWritePos = 0;
-  //   }
-  // }
 }
 
 void OnOpsClicked(const View &view) {
@@ -122,11 +133,10 @@ void OnOpsClicked(const View &view) {
 }
 
 void OnKeypadClicked(const View &view) {
-  // TODO: Handle decimals
-  // if (StrEqual(view.tag, ".") && resultWritePos == 0) {
-  //   resultWritePos = 1;
-  //   return;
-  // }
+  if (StrEqual(view.tag, ".")) {
+    setDecimal();
+    return;
+  }
   if (StrEqual(view.tag, "=")) {
     handleEquals();
     return;
