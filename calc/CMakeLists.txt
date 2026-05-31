@@ -3,6 +3,7 @@ project(calc LANGUAGES C CXX)
 
 include(FetchContent)
 Set(FETCHCONTENT_QUIET FALSE)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../)
 
 message(STATUS "Downloading Raylib...")
 FetchContent_Declare(
@@ -26,12 +27,11 @@ set(SRCS
 )
 
 add_executable(${PROJECT_NAME} ${SRCS})
-
 target_include_directories(${PROJECT_NAME} PUBLIC ./)
-
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 
-if(APPLE)
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+if(APPLE AND (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"))
   set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_BUNDLE_NAME "Calc"
