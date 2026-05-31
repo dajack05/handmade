@@ -64,9 +64,11 @@ DigiOpList prefixToPostfix(DigiOpList &input) {
 
   // Once finished, place any remaining Ops in the stack into the queue.
 
-  for (auto i = 0; i < st.size(); i++) {
+  while (st.size() > 1) {
     qu.push(st.pop());
   }
+
+  printf("stack size: %i\nqueue size: %i\n", st.size(), qu.size());
 
   return qu;
 }
@@ -129,6 +131,23 @@ double CalculateResult(DigiOpList &input) {
   return processPostfixed(postfixed);
 }
 
+bool InternalListsAreSame(DigiOpList &a, DigiOpList &b) {
+  if (a.size() != b.size()) {
+    return false;
+  }
+
+  for (auto i = 0; i < a.size(); i++) {
+    const DigiOp digit = a.get(i);
+    if (digit.op != b.get(i).op) {
+      return false;
+    }
+    if (digit.value != b.get(i).value) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool InternalPostfixTest() {
   BEGIN_TEST
   DigiOpList input;
@@ -160,10 +179,8 @@ bool InternalPostfixTest() {
   });
 
   DigiOpList postfixed = prefixToPostfix(input);
-  for (auto i = 0; i < expected.size(); i++) {
-    ASSERT_DBL(postfixed.get(i).value, expected.get(i).value);
-    ASSERT_INT(postfixed.get(i).op, expected.get(i).op);
-  }
+
+  ASSERT_INT(InternalListsAreSame(postfixed, expected), true);
 
   return 1;
 }
@@ -191,39 +208,71 @@ bool InternalPostfixProcessTest() {
 
 bool InternalPostfixSpecialTest() {
   BEGIN_TEST
-  DigiOpList list;
-  list.pushAll({
-      12,
-      Op::Multiply,
-      Op::ParenOpen,
-      3,
-      Op::Subtract,
-      10,
-      Op::ParenClose,
-  });
 
-  DigiOpList expect;
-  expect.pushAll({
-      12,
-      3,
-      10,
-      Op::Subtract,
-      Op::Multiply,
-  });
+  {
+    // 12 * ( 3 - 10 )
+    DigiOpList list;
+    list.pushAll({
+        12,
+        Op::Multiply,
+        Op::ParenOpen,
+        3,
+        Op::Subtract,
+        10,
+        Op::ParenClose,
+    });
 
-  DigiOpList result = prefixToPostfix(list);
-  char resultStr[128] = {0};
-  result.toString(resultStr, 128);
-  printf("result: %s\n", resultStr);
-  ASSERT_INT(result.size(), expect.size())
+    DigiOpList expect;
+    expect.pushAll({
+        12,
+        3,
+        10,
+        Op::Subtract,
+        Op::Multiply,
+    });
 
-  for (auto i = 0; i < result.size(); i++) {
-    const DigiOp digit = result.get(i);
-    if (digit.isOp()) {
-      ASSERT_INT((int)digit.op, (int)expect.get(i).op);
-    } else {
-      ASSERT_DBL(digit.value, expect.get(i).value);
+    DigiOpList result = prefixToPostfix(list);
+
+    ASSERT_INT(InternalListsAreSame(result, expect), true);
+  }
+
+  {
+    // 123 + 456 + 789 + 123 = 1491
+    DigiOpList list;
+    list.pushAll({
+        123,
+        Op::Add,
+        456,
+        Op::Add,
+        789,
+        Op::Add,
+        123,
+    });
+
+    DigiOpList expected;
+    expected.pushAll({
+        123,
+        456,
+        789,
+        123,
+        Op::Add,
+        Op::Add,
+        Op::Add,
+    });
+
+    DigiOpList result = prefixToPostfix(list);
+
+    if (!InternalListsAreSame(result, expected)) {
+      char resultStr[1024] = {0};
+      result.toString(resultStr, 1024);
+      char expectedStr[1024] = {0};
+      expected.toString(expectedStr, 1024);
+      printf("Expected %s. Got %s\n", expectedStr, resultStr);
+      return false;
     }
+
+    double finalResult = CalculateResult(list);
+    ASSERT_DBL(finalResult, 1491.0);
   }
 
   return true;
