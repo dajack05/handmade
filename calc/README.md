@@ -13,25 +13,19 @@ Current Libs:
 - [CMake](https://cmake.org/)
 - Clang/GCC (or I guess MSVC but I haven't tested that yet)
 
-### MacOS
-
-Builds as-is. Assuming your C++ build system works for other projects, it should work for this.
-
-### Linux
-
-You'll need to install a development libraries for opengl and X11 stuff. The build process will error out and tell you what to install lol
-
-For Debian based systems, when it errors with something like "unable to find xrandr" you can just run `apt install libxrandr-dev`. Keep doing that process until it builds 🤷
-
-### Windows
-
-You're on your own pal... My best guess would be to suggest using something like [msys2](https://www.msys2.org/) or try building the CMake project in Visual Studio.
-
 ## Building
 
-This project uses the [meson](https://mesonbuild.com/) build system.
+This project uses the [cmake](https://cmake.org/) build system.
+
+For ease of development I've also made a Makefile that handles some of the gruntwork.
+
+You can look through the Makefile and see what they do. It's hardcoded to use tools like LLDB for debugging.
+
+**For most regular builds**
 
 1. Clone/download the repo.
 2. Move to the root of the Calc project.
-3. Execute `make release`. This will use make to run all the meson commands and build the executable.
+3. Execute `make release`.
+4. Profit.
 
+That's pretty much it. You should be left with a single executable in the calc directory.
