@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.30)
 project(calc LANGUAGES C CXX)
 
 include(FetchContent)
@@ -12,7 +12,6 @@ FetchContent_Declare(
   GIT_TAG         "6.0"
   GIT_PROGRESS    TRUE
 )
-
 FetchContent_MakeAvailable(raylib)
 
 set(SRCS
@@ -23,11 +22,23 @@ set(SRCS
     "src/util/String.cpp"
     "src/calculator/Calc.cpp"
     "src/calculator/DigiOp.cpp"
+    
+    "src/renderer/Renderer.cpp"
+    "src/renderer/data.cpp"
+
     "lib/stb/stb_sprintf.c"
+
+    # ADD BACK IN ONCE RAYLIB REMOVED
+    # "lib/glad/src/glad.c"
 )
 
 add_executable(${PROJECT_NAME} ${SRCS})
-target_include_directories(${PROJECT_NAME} PUBLIC ./)
+target_include_directories(${PROJECT_NAME} PUBLIC 
+  ./ 
+  ./lib/glad/include/ 
+  ./build/_deps/raylib-src/src/external/glfw/include/
+  ./build/_deps/raylib-src/src/external/
+)
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")

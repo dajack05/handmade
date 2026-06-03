@@ -5,6 +5,7 @@
 #include "src/View.hpp"
 #include "src/calculator/Calc.hpp"
 #include "src/calculator/DigiOp.hpp"
+#include "src/renderer/Renderer.hpp"
 #include "src/tests/Tests.hpp"
 #include "src/util/Math.hpp"
 #include "src/util/String.hpp"
@@ -141,6 +142,10 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  if (!Renderer::Init(400, 500, "Calc GLFW")) {
+    return 1;
+  }
+
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(400, 500, "Calc");
   SetWindowMinSize(300, 300);
@@ -153,6 +158,9 @@ int main(int argc, char **argv) {
     const bool layout_vertical = GetScreenWidth() < GetScreenHeight();
     frameCount++;
     handleKeyboardInput();
+
+    Renderer::BeginDrawing();
+    Renderer::EndDrawing();
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -221,6 +229,8 @@ int main(int argc, char **argv) {
   }
 
   CloseWindow();
+
+  Renderer::Destroy();
 
   return 0;
 }
