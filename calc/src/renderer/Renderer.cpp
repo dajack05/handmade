@@ -1,8 +1,13 @@
 #include "src/renderer/Renderer.hpp"
 
+#include "lib/glm/ext/matrix_clip_space.hpp"
+#include "lib/glm/ext/matrix_transform.hpp"
+#include "lib/glm/trigonometric.hpp"
 #include "src/renderer/data.hpp"
 
 #include "glad.h"
+#include "lib/glm/glm.hpp"
+#include "lib/glm/gtc/matrix_transform.hpp"
 
 #include <GLFW/glfw3.h>
 #include <cstdio>
@@ -11,7 +16,6 @@ namespace Renderer {
 
 // GLFW stuff
 GLFWwindow *window = nullptr;
-GLFWwindow *otherWindow = nullptr; // TODO: REMOVE AFTER RAYLIB IS GONE
 int window_w, window_h;
 
 // GL Stuff
@@ -19,26 +23,15 @@ unsigned int VBO = 0;
 unsigned int VAO = 0;
 unsigned int shaderProgram = 0;
 
-// TODO: REMOVE AFTER RAYLIB IS GONE
-void SetContext() {
-  otherWindow = glfwGetCurrentContext();
-  glfwMakeContextCurrent(window);
-}
-
-// TODO: REMOVE AFTER RAYLIB IS GONE
-void RestoreContext() {
-  if (otherWindow) {
-    glfwMakeContextCurrent(otherWindow);
-  }
-  otherWindow = nullptr;
-}
+// View stuff
+glm::mat4 projectionMat;
 
 void OnFramebufferResize(GLFWwindow *win, int width, int height) {
-  SetContext();
   window_w = width;
   window_h = height;
   glViewport(0, 0, window_w, window_h);
-  RestoreContext();
+  projectionMat =
+      glm::ortho(0.0, (double)window_w, (double)window_h, 0.0, -1.0, 1.0);
 }
 
 bool Init(int width, int height, const char *title) {
@@ -52,6 +45,7 @@ bool Init(int width, int height, const char *title) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
   if (!window) {
     const char *description;
@@ -63,16 +57,17 @@ bool Init(int width, int height, const char *title) {
   window_w = width;
   window_h = height;
 
+  glfwSetFramebufferSizeCallback(window, OnFramebufferResize);
   glfwMakeContextCurrent(window);
 
   gladLoadGL((GLADloadfunc)glfwGetProcAddress);
 
-  glfwSetFramebufferSizeCallback(window, OnFramebufferResize);
-  glViewport(0, 0, window_w, window_h);
-
   /**
    * OPENGL SETUP
    */
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // build shader
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -137,18 +132,18 @@ bool Init(int width, int height, const char *title) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
+  projectionMat =
+      glm::ortho(0.0, (double)window_w, (double)window_h, 0.0, -1.0, 1.0);
+
   return true;
 }
 
 void BeginDrawing() {
-  SetContext();
   glUseProgram(shaderProgram);
   glBindVertexArray(VAO);
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-
-  glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void EndDrawing() {
@@ -156,7 +151,6 @@ void EndDrawing() {
   glfwPollEvents();
 
   glUseProgram(0);
-  RestoreContext();
 }
 
 void Destroy() {
@@ -168,5 +162,36 @@ void Destroy() {
   VAO = 0;
   glfwTerminate();
 }
+
+void FillRect(int x, int y, int w, int h, glm::vec4 color) {
+  glm::mat4 modelMat = glm::mat4(1.0f);
+  modelMat = glm::translate(modelMat, {x, y, 0});
+  modelMat = glm::scale(modelMat, {w, h, 1});
+
+  // TODO: Move this to a one-time lookup
+  GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &modelMat[0][0]);
+  GLint projLoc = glGetUniformLocation(shaderProgram, "proj");
+  glUniformMatrix4fv(projLoc, 1, GL_FALSE, &projectionMat[0][0]);
+
+  GLint resLoc = glGetUniformLocation(shaderProgram, "resolution");
+  glUniform2f(resLoc, (float)window_w, (float)window_h);
+
+  GLint tintLoc = glGetUniformLocation(shaderProgram, "tint");
+  glUniform4fv(tintLoc, 1, &color[0]);
+
+  GLint sizeLoc = glGetUniformLocation(shaderProgram, "size");
+  glUniform2f(sizeLoc, (float)w, (float)h);
+
+  GLint radiusLoc = glGetUniformLocation(shaderProgram, "radius");
+  glUniform1f(radiusLoc, 20.0f);
+
+  GLint originLoc = glGetUniformLocation(shaderProgram, "origin");
+  glUniform2f(originLoc, x, window_h - y);
+
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+bool WindowCloseRequested() { return glfwWindowShouldClose(window); }
 
 } // namespace Renderer

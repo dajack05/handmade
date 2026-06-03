@@ -138,17 +138,33 @@ void OnKeypadClicked(const View &view) {
 
 int main(int argc, char **argv) {
 
-  if (!RunTests()) {
+  if (!Renderer::Init(400, 500, "Calc GLFW")) {
     return 1;
   }
 
-  if (!Renderer::Init(400, 500, "Calc GLFW")) {
+  float t = 0.0f;
+  while (!Renderer::WindowCloseRequested()) {
+    Renderer::BeginDrawing();
+    const int w = 100 + sin(t * 2) * 100;
+    const int h = 100 + cos(t * 2) * 100;
+    Renderer::FillRect(100 + sin(t) * 100, 100 + cos(t) * 100, w, h,
+                       {0.0f, 1.0f, 1.0f, 1.0f});
+    Renderer::EndDrawing();
+    t += 0.01f;
+  }
+
+  Renderer::Destroy();
+
+  return 0;
+
+  if (!RunTests()) {
     return 1;
   }
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(400, 500, "Calc");
   SetWindowMinSize(300, 300);
+  SetWindowPosition(0, 0);
   SetTargetFPS(60);
 
   handleClear();
@@ -158,9 +174,6 @@ int main(int argc, char **argv) {
     const bool layout_vertical = GetScreenWidth() < GetScreenHeight();
     frameCount++;
     handleKeyboardInput();
-
-    Renderer::BeginDrawing();
-    Renderer::EndDrawing();
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -229,8 +242,6 @@ int main(int argc, char **argv) {
   }
 
   CloseWindow();
-
-  Renderer::Destroy();
 
   return 0;
 }
