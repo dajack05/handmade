@@ -26,6 +26,10 @@ unsigned int shaderProgram = 0;
 // View stuff
 glm::mat4 projectionMat;
 
+// General state stuff
+double lastTime;
+double delta = 1.0 / 60.0;
+
 void OnFramebufferResize(GLFWwindow *win, int width, int height) {
   window_w = width;
   window_h = height;
@@ -59,6 +63,7 @@ bool Init(int width, int height, const char *title) {
 
   glfwSetFramebufferSizeCallback(window, OnFramebufferResize);
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);
 
   gladLoadGL((GLADloadfunc)glfwGetProcAddress);
 
@@ -135,11 +140,16 @@ bool Init(int width, int height, const char *title) {
   projectionMat =
       glm::ortho(0.0, (double)window_w, (double)window_h, 0.0, -1.0, 1.0);
 
+  lastTime = glfwGetTime();
+
   return true;
 }
 
 void BeginDrawing() {
-  glUseProgram(shaderProgram);
+  double now = glfwGetTime();
+  delta = now - lastTime;
+  lastTime = now;
+
   glBindVertexArray(VAO);
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -149,8 +159,6 @@ void BeginDrawing() {
 void EndDrawing() {
   glfwSwapBuffers(window);
   glfwPollEvents();
-
-  glUseProgram(0);
 }
 
 void Destroy() {
@@ -163,7 +171,25 @@ void Destroy() {
   glfwTerminate();
 }
 
-void FillRect(int x, int y, int w, int h, glm::vec4 color) {
+void SetStyle(glm::vec4 bgColor, glm::vec4 borderColor, int borderThickness,
+              glm::vec4 radius) {
+  glUseProgram(shaderProgram);
+  GLint resLoc = glGetUniformLocation(shaderProgram, "resolution");
+  glUniform2f(resLoc, (float)window_w, (float)window_h);
+
+  GLint bgColorLoc = glGetUniformLocation(shaderProgram, "bgColor");
+  glUniform4fv(bgColorLoc, 1, &bgColor[0]);
+
+  GLint borderColorLoc = glGetUniformLocation(shaderProgram, "borderColor");
+  glUniform4fv(borderColorLoc, 1, &borderColor[0]);
+
+  GLint radiusLoc = glGetUniformLocation(shaderProgram, "radius");
+  glUniform4fv(radiusLoc, 1, &radius[0]);
+  glUseProgram(0);
+}
+
+void FillRect(int x, int y, int w, int h) {
+  glUseProgram(shaderProgram);
   glm::mat4 modelMat = glm::mat4(1.0f);
   modelMat = glm::translate(modelMat, {x, y, 0});
   modelMat = glm::scale(modelMat, {w, h, 1});
@@ -174,24 +200,18 @@ void FillRect(int x, int y, int w, int h, glm::vec4 color) {
   GLint projLoc = glGetUniformLocation(shaderProgram, "proj");
   glUniformMatrix4fv(projLoc, 1, GL_FALSE, &projectionMat[0][0]);
 
-  GLint resLoc = glGetUniformLocation(shaderProgram, "resolution");
-  glUniform2f(resLoc, (float)window_w, (float)window_h);
-
-  GLint tintLoc = glGetUniformLocation(shaderProgram, "tint");
-  glUniform4fv(tintLoc, 1, &color[0]);
-
   GLint sizeLoc = glGetUniformLocation(shaderProgram, "size");
   glUniform2f(sizeLoc, (float)w, (float)h);
-
-  GLint radiusLoc = glGetUniformLocation(shaderProgram, "radius");
-  glUniform1f(radiusLoc, 20.0f);
 
   GLint originLoc = glGetUniformLocation(shaderProgram, "origin");
   glUniform2f(originLoc, x, window_h - y);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
+  glUseProgram(0);
 }
 
 bool WindowCloseRequested() { return glfwWindowShouldClose(window); }
+
+double DeltaTime() { return delta; }
 
 } // namespace Renderer

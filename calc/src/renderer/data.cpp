@@ -18,10 +18,11 @@ const char *fragmentShaderSrc = R"(
 out vec4 FragColor;
 
 uniform vec2 resolution;
-uniform vec4 tint;
+uniform vec4 bgColor;
+uniform vec4 borderColor;
 uniform vec2 size;
 uniform vec2 origin;
-uniform float radius;
+uniform vec4 radius;
 
 float roundedBoxSDF(vec2 CenterPosition, vec2 Size, vec4 Radius)
 {
@@ -40,19 +41,16 @@ void main() {
     // Centered coordinates
     vec2 p = origin + vec2(halfSize.x, -halfSize.y);
     
-    // Rounded corner radius
-    // vec4 _radius = vec4(radius);
-    vec4 _radius = vec4(10.0,10.0,10.0,10.0);
     
     // Calculate distance
-    float distance = roundedBoxSDF(gl_FragCoord.xy - p, halfSize, _radius);
+    float distance = roundedBoxSDF(gl_FragCoord.xy - p, halfSize, radius);
 
 
     // Smooth edges (anti-aliasing)
     float edge = smoothstep(0.5, -0.5, distance);
     
     // Output color
-    FragColor = tint * vec4(1.0, 1.0, 1.0, edge); // Orange with rounded alpha
+    FragColor = bgColor * vec4(1.0, 1.0, 1.0, edge); // Orange with rounded alpha
 }
 )";
 

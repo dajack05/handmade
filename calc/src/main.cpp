@@ -13,6 +13,9 @@
 #include <cmath>
 #include <raylib.h>
 
+#define MAP(value, in_min, in_max, out_min, out_max)                           \
+  ((value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+
 void drawNumbers();
 void drawOperators(bool vertical);
 void handleKeyboardInput();
@@ -145,12 +148,31 @@ int main(int argc, char **argv) {
   float t = 0.0f;
   while (!Renderer::WindowCloseRequested()) {
     Renderer::BeginDrawing();
-    const int w = 100 + sin(t * 2) * 100;
-    const int h = 100 + cos(t * 2) * 100;
-    Renderer::FillRect(100 + sin(t) * 100, 100 + cos(t) * 100, w, h,
-                       {0.0f, 1.0f, 1.0f, 1.0f});
+
+    Renderer::SetStyle(
+        {
+            1.0,
+            0.5,
+            0.0,
+            1.0,
+        },
+        {
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+        },
+        2,
+        {
+            MAP(sin(t), -1.0, 1.0, 0.0, 50.0),
+            MAP(sin(t * 2), -1.0, 1.0, 0.0, 50.0),
+            MAP(sin(t * 3), -1.0, 1.0, 0.0, 50.0),
+            MAP(sin(t * 4), -1.0, 1.0, 0.0, 50.0),
+        });
+
+    Renderer::FillRect(200, 200, 100, 100);
     Renderer::EndDrawing();
-    t += 0.01f;
+    t += Renderer::DeltaTime();
   }
 
   Renderer::Destroy();

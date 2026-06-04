@@ -12,9 +12,12 @@ void Destroy();
 void BeginDrawing();
 void EndDrawing();
 
-void FillRect(int x, int y, int w, int h, glm::vec4 color);
+void SetStyle(glm::vec4 bgColor, glm::vec4 borderColor, int borderThickness,
+              glm::vec4 radius);
+void FillRect(int x, int y, int w, int h);
 
 // Util Functions
 bool WindowCloseRequested();
+double DeltaTime();
 
 }; // namespace Renderer
