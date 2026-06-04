@@ -183,6 +183,10 @@ void SetStyle(glm::vec4 bgColor, glm::vec4 borderColor, int borderThickness,
   GLint borderColorLoc = glGetUniformLocation(shaderProgram, "borderColor");
   glUniform4fv(borderColorLoc, 1, &borderColor[0]);
 
+  GLint borderThicknessLoc =
+      glGetUniformLocation(shaderProgram, "borderThickness");
+  glUniform1f(borderThicknessLoc, borderThickness);
+
   GLint radiusLoc = glGetUniformLocation(shaderProgram, "radius");
   glUniform4fv(radiusLoc, 1, &radius[0]);
   glUseProgram(0);

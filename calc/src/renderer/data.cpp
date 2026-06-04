@@ -20,9 +20,11 @@ out vec4 FragColor;
 uniform vec2 resolution;
 uniform vec4 bgColor;
 uniform vec4 borderColor;
+uniform vec4 radius;
+uniform float borderThickness;
+
 uniform vec2 size;
 uniform vec2 origin;
-uniform vec4 radius;
 
 float roundedBoxSDF(vec2 CenterPosition, vec2 Size, vec4 Radius)
 {
@@ -47,10 +49,14 @@ void main() {
 
 
     // Smooth edges (anti-aliasing)
-    float edge = smoothstep(0.5, -0.5, distance);
+    float smoothedAlpha = 1.0-smoothstep(0.0, 0.25, distance);
+
+    float borderAlpha   = 1.0-smoothstep(borderThickness - 0.25, borderThickness, abs(distance));
     
     // Output color
-    FragColor = bgColor * vec4(1.0, 1.0, 1.0, edge); // Orange with rounded alpha
+    vec4 finalBg = bgColor * vec4(1.0, 1.0, 1.0, smoothedAlpha);
+    vec4 finalBorder = borderColor * vec4(1.0, 1.0, 1.0, borderAlpha);
+    FragColor = mix(finalBg, finalBorder, borderAlpha);
 }
 )";
 
