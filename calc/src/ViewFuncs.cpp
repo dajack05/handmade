@@ -7,20 +7,23 @@
 
 namespace ViewFuncs {
 void RenderView(const View &view) {
+  Renderer::SetStyle(view.bgColor, view.borderColor, view.borderThickness,
+                     glm::vec4(5));
   Renderer::FillRect(view.x, view.y, view.w, view.h);
-//   const Rectangle rect = {
-//       (float)view.x,
-//       (float)view.y,
-//       (float)view.w,
-//       (float)view.h,
-//   };
-//   if (view.bgColor.a != 0) {
-//     DrawRectangleRounded(rect, view.roundness, 8, view.bgColor);
-//   }
-//   if (view.borderThickness > 0) {
-//     DrawRectangleRoundedLinesEx(rect, view.roundness, 8, view.borderThickness,
-//                                 view.borderColor);
-//   }
+  //   const Rectangle rect = {
+  //       (float)view.x,
+  //       (float)view.y,
+  //       (float)view.w,
+  //       (float)view.h,
+  //   };
+  //   if (view.bgColor.a != 0) {
+  //     DrawRectangleRounded(rect, view.roundness, 8, view.bgColor);
+  //   }
+  //   if (view.borderThickness > 0) {
+  //     DrawRectangleRoundedLinesEx(rect, view.roundness, 8,
+  //     view.borderThickness,
+  //                                 view.borderColor);
+  //   }
 }
 
 void RenderButton(const View &view) {
@@ -63,7 +66,8 @@ void RenderText(const View &view) {
   //     }
   //   }
   //   if (didResize) {
-  //     StrCopy(StrAppend(nView.label, "..."), nView.label, VIEW_MAX_LABEL_LEN);
+  //     StrCopy(StrAppend(nView.label, "..."), nView.label,
+  //     VIEW_MAX_LABEL_LEN);
   //   }
   //   const int center_x = nView.x + nView.padding;
   //   const int center_y = nView.y + nView.h / 2;

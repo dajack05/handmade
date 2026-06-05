@@ -290,14 +290,14 @@ void BeginPane(View view, int width, int height, const char *tag) {
 
 void Button(View view, int width, int height, const char *label,
             void (*onClickFunc)(const View &), bool accent, const char *tag,
-            const Color bgColor, const Color borderColor) {
+            const glm::vec4 bgColor, const glm::vec4 borderColor) {
   view.type = ViewType::Button;
   view.onClickFunc = onClickFunc;
-  if (ColorIsEqual(bgColor, NONE))
+  if (bgColor == NONE)
     view.bgColor = accent ? Colors.accent : Colors.primary;
   else
     view.bgColor = bgColor;
-  if (ColorIsEqual(borderColor, NONE))
+  if (borderColor == NONE)
     view.borderColor = accent ? Colors.accent_lt : Colors.primary_lt;
   else
     view.borderColor = borderColor;

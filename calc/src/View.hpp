@@ -1,7 +1,6 @@
 #pragma once
 
 #include "src/Colors.hpp"
-#include <raylib.h>
 
 #define VIEW_MAX_LABEL_LEN 128
 #define VIEW_MAX_TAG_LEN 32
@@ -24,7 +23,7 @@ enum class ViewState {
   Focus,
 };
 
-const Color NONE{0, 0, 0, 0};
+const glm::vec4 NONE{0, 0, 0, 0};
 
 const int SizeFit = 0;
 const int SizeGrow = -1;
@@ -41,9 +40,9 @@ struct View {
   int padding = 0;
   int gap = 0;
 
-  Color bgColor = Colors.dark;
-  Color borderColor = Colors.light;
-  Color textColor = Colors.light;
+  glm::vec4 bgColor = Colors.dark;
+  glm::vec4 borderColor = Colors.light;
+  glm::vec4 textColor = Colors.light;
   int borderThickness = 0;
 
   ViewState state = ViewState::None;
