@@ -1,4 +1,5 @@
 #include "Layout.hpp"
+
 #include "src/Colors.hpp"
 #include "src/Stats.hpp"
 #include "src/View.hpp"
@@ -7,7 +8,6 @@
 #include "src/util/Math.hpp"
 #include "src/util/String.hpp"
 #include <cstdio>
-#include <raylib.h>
 
 #define CACHE_SIZE 1024
 
@@ -127,7 +127,7 @@ void BeginFrame() {
   viewCache.clear();
   viewStack.clear();
   layout_start = GetTime();
-  SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+  // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 }
 
 void EndFrame() {

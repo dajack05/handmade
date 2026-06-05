@@ -2,12 +2,9 @@
 
 #include "lib/glm/ext/matrix_clip_space.hpp"
 #include "lib/glm/ext/matrix_transform.hpp"
-#include "lib/glm/trigonometric.hpp"
 #include "src/renderer/data.hpp"
 
 #include "glad.h"
-#include "lib/glm/glm.hpp"
-#include "lib/glm/gtc/matrix_transform.hpp"
 
 #include <GLFW/glfw3.h>
 #include <cstdio>
@@ -217,5 +214,7 @@ void FillRect(int x, int y, int w, int h) {
 bool WindowCloseRequested() { return glfwWindowShouldClose(window); }
 
 double DeltaTime() { return delta; }
+
+glm::ivec2 WindowSize() { return {window_w, window_h}; }
 
 } // namespace Renderer

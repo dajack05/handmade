@@ -1,4 +1,3 @@
-#include "lib/stb/stb_sprintf.h"
 #include "src/Colors.hpp"
 #include "src/Layout.hpp"
 #include "src/Stats.hpp"
@@ -10,8 +9,10 @@
 #include "src/util/Math.hpp"
 #include "src/util/String.hpp"
 
+#include "lib/glm/glm.hpp"
+#include "lib/stb/stb_sprintf.h"
+
 #include <cmath>
-#include <raylib.h>
 
 #define MAP(value, in_min, in_max, out_min, out_max)                           \
   ((value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
@@ -19,6 +20,7 @@
 void drawNumbers();
 void drawOperators(bool vertical);
 void handleKeyboardInput();
+void drawLayout(bool layout_vertical, int windowWidth, int windowHeight);
 
 const char *KEYS[12] = {
     "7", "8", "9", //
@@ -140,130 +142,39 @@ void OnKeypadClicked(const View &view) {
 }
 
 int main(int argc, char **argv) {
+  if (!RunTests()) {
+    return 1;
+  }
 
   if (!Renderer::Init(400, 500, "Calc GLFW")) {
     return 1;
   }
 
-  float t = 0.0f;
-  while (!Renderer::WindowCloseRequested()) {
-    Renderer::BeginDrawing();
-
-    Renderer::SetStyle(
-        {
-            1.0,
-            0.5,
-            0.0,
-            1.0,
-        },
-        {
-            0.0,
-            1.0,
-            1.0,
-            1.0,
-        },
-        2,
-        {
-            MAP(sin(t), -1.0, 1.0, 0.0, 50.0),
-            MAP(sin(t * 2), -1.0, 1.0, 0.0, 50.0),
-            MAP(sin(t * 3), -1.0, 1.0, 0.0, 50.0),
-            MAP(sin(t * 4), -1.0, 1.0, 0.0, 50.0),
-        });
-
-    Renderer::FillRect(200, 200, 100, 100);
-    Renderer::EndDrawing();
-    t += Renderer::DeltaTime();
-  }
-
-  Renderer::Destroy();
-
-  return 0;
-
-  if (!RunTests()) {
-    return 1;
-  }
-
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(400, 500, "Calc");
-  SetWindowMinSize(300, 300);
-  SetWindowPosition(0, 0);
-  SetTargetFPS(60);
+  Renderer::SetStyle({.9, .9, .9, 1.0}, {0.5, 0.5, 0.5, 1.0}, 1,
+                     {10, 10, 10, 10});
 
   handleClear();
+  float t = 0.0f;
   unsigned long frameCount = 0;
 
-  while (!WindowShouldClose()) {
-    const bool layout_vertical = GetScreenWidth() < GetScreenHeight();
+  while (!Renderer::WindowCloseRequested()) {
+    const glm::ivec2 windowSize = Renderer::WindowSize();
+    const bool layout_vertical = windowSize.x < windowSize.y;
     frameCount++;
-    handleKeyboardInput();
+    t += Renderer::DeltaTime();
 
-    BeginDrawing();
-    ClearBackground(BLACK);
+    Renderer::BeginDrawing();
 
-    Layout::BeginFrame();
-    Layout::BeginVBox(
-        {
-            .bgColor = Colors.primary,
-            .layoutDirection = LayoutDirection::Vertical,
-        },
-        GetScreenWidth(), GetScreenHeight(), 0);
-    {
-      Layout::BeginVBox({.bgColor = NONE}, SizeGrow, SizeFit, 10, 5);
-      {
-        // Result bar
-        char eqStr[VIEW_MAX_LABEL_LEN] = {0};
-        eq.toString(eqStr, VIEW_MAX_LABEL_LEN);
-        Layout::Text(
-            {
-                .roundness = 0.25f,
-                .bgColor = Colors.light,
-                .textColor = Colors.dark,
-            },
-            SizeGrow, 50, eqStr, 5);
-        Layout::BeginHBox({}, SizeGrow, 50, 0, 5);
-        {
-          Layout::Text({}, 120, 50, "Result:");
-          Layout::Text(
-              {
-                  .roundness = 0.25f,
-                  .bgColor = Colors.light,
-                  .textColor = Colors.dark,
-              },
-              SizeGrow, SizeGrow, StrFromDouble(result), 5);
-        }
-        Layout::EndView();
-      }
-      Layout::EndView();
+    drawLayout(layout_vertical, windowSize.x, windowSize.y);
 
-      if (layout_vertical) {
-        Layout::BeginVBox({}, SizeGrow, SizeGrow, 0);
-      } else {
-        Layout::BeginHBox({}, SizeGrow, SizeGrow, 0);
-      }
-      {
-        // Main container
-        if (layout_vertical) {
-          drawOperators(false);
-          drawNumbers();
-        } else {
-          drawNumbers();
-          drawOperators(true);
-        }
-      }
-      Layout::EndView();
-    }
-    Layout::EndView();
-
-    Layout::EndFrame();
-
-    EndDrawing();
+    Renderer::EndDrawing();
 
     if (frameCount % 60 == 0) {
       Stats::Print();
     }
   }
 
-  CloseWindow();
+  Renderer::Destroy();
 
   return 0;
 }
@@ -353,4 +264,62 @@ void handleKeyboardInput() {
   if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_DELETE)) {
     backspace();
   }
+}
+
+void drawLayout(bool layout_vertical, int windowWidth, int windowHeight) {
+  Layout::BeginFrame();
+  Layout::BeginVBox(
+      {
+          .bgColor = Colors.primary,
+          .layoutDirection = LayoutDirection::Vertical,
+      },
+      windowWidth, windowHeight, 0);
+  {
+    Layout::BeginVBox({.bgColor = NONE}, SizeGrow, SizeFit, 10, 5);
+    {
+      // Result bar
+      char eqStr[VIEW_MAX_LABEL_LEN] = {0};
+      eq.toString(eqStr, VIEW_MAX_LABEL_LEN);
+      Layout::Text(
+          {
+              .roundness = 0.25f,
+              .bgColor = Colors.light,
+              .textColor = Colors.dark,
+          },
+          SizeGrow, 50, eqStr, 5);
+      Layout::BeginHBox({}, SizeGrow, 50, 0, 5);
+      {
+        Layout::Text({}, 120, 50, "Result:");
+        Layout::Text(
+            {
+                .roundness = 0.25f,
+                .bgColor = Colors.light,
+                .textColor = Colors.dark,
+            },
+            SizeGrow, SizeGrow, StrFromDouble(result), 5);
+      }
+      Layout::EndView();
+    }
+    Layout::EndView();
+
+    if (layout_vertical) {
+      Layout::BeginVBox({}, SizeGrow, SizeGrow, 0);
+    } else {
+      Layout::BeginHBox({}, SizeGrow, SizeGrow, 0);
+    }
+    {
+      // Main container
+      if (layout_vertical) {
+        drawOperators(false);
+        drawNumbers();
+      } else {
+        drawNumbers();
+        drawOperators(true);
+      }
+    }
+    Layout::EndView();
+  }
+  Layout::EndView();
+
+  Layout::EndFrame();
 }

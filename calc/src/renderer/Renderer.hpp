@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib/glm/vec4.hpp"
+#include "lib/glm/fwd.hpp"
 
 namespace Renderer {
 
@@ -19,5 +19,6 @@ void FillRect(int x, int y, int w, int h);
 // Util Functions
 bool WindowCloseRequested();
 double DeltaTime();
+glm::ivec2 WindowSize();
 
 }; // namespace Renderer
