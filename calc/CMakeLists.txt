@@ -25,6 +25,7 @@ set(SRCS
     
     "src/renderer/Renderer.cpp"
     "src/renderer/data.cpp"
+    "src/renderer/font.cpp"
 
     "lib/stb/stb_sprintf.c"
 
