@@ -57,7 +57,6 @@ void DigiOpList::clear() { writeIdx = 0; }
 
 void DigiOpList::toString(char *destination, unsigned int maxSize) const {
   unsigned int strIdx = 0;
-  printf("Size: %i. maxSize: %i\n", size(), maxSize);
   for (auto i = 0; i < size() && strIdx < maxSize; i++) {
     const DigiOp digit = data[i];
     if (digit.isOp()) {
@@ -68,7 +67,6 @@ void DigiOpList::toString(char *destination, unsigned int maxSize) const {
       destination[strIdx++] = OpChar[(unsigned int)digit.op];
     } else {
       const char *valueStr = StrFromDouble(digit.value);
-      printf("valueStr: %s\n", valueStr);
       for (auto j = 0; j < StrLen(valueStr); j++) {
         if (strIdx >= maxSize) {
           printf(
@@ -88,7 +86,6 @@ void DigiOpList::toString(char *destination, unsigned int maxSize) const {
       destination[strIdx++] = ' ';
     }
   }
-  printf("Write %i chars\n", strIdx);
 }
 
 void DigiOp::PrettyPrint(const DigiOp &item) {

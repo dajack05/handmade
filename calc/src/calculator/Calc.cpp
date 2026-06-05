@@ -68,8 +68,6 @@ DigiOpList prefixToPostfix(DigiOpList &input) {
     qu.push(st.pop());
   }
 
-  printf("stack size: %i\nqueue size: %i\n", st.size(), qu.size());
-
   return qu;
 }
 
